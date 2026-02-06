@@ -1,0 +1,618 @@
+module ietf-svc {
+ yang-version 1.1;
+ namespace "urn:ietf:params:xml:ns:yang:ietf-svc";
+ prefix svc;
+ import ietf-inet-types {
+  prefix inet;
+ }
+ import ietf-yang-types {
+  prefix yang;
+ }
+ organization
+  "IETF ONSEN Working Group";
+ contact
+  "Kris Lambrechts
+   Email: kris@netedge.plus";
+ description
+ "This YANG module defines a generic base for service
+ configuration models. This model is common across all
+ vendor implementations.
+
+ Copyright (c) 2026 IETF Trust and the persons
+ identified as authors of the code.  All rights reserved.
+
+ Redistribution and use in source and binary forms, with or
+ without modification, is permitted pursuant to, and subject
+ to the license terms contained in, the Simplified BSD License
+ set forth in Section 4.c of the IETF Trust's Legal Provisions
+ Relating to IETF Documents
+ (https://trustee.ietf.org/license-info).";
+
+ revision 2026-02-06 {
+  description
+  "Initial document.";
+  }
+ /* Features */
+ feature site-diversity {
+  description
+  "Enables support of site diversity constraints.";
+ }
+ feature always-on {
+  description
+  "Enables support of the 'always-on' access constraint.";
+ }
+ feature requested-type {
+  description
+  "Enables support of the 'requested-type' access constraint.";
+ }
+ feature bearer-reference {
+  description
+  "Enables support of the 'bearer-reference' access constraint.";
+ }
+ /* Typedefs */
+ typedef svc-id {
+  type string;
+  description
+  "Defines a type of service component identifier.";
+ }
+ typedef template-id {
+  type string;
+  description
+  "Defines a type of service template identifier.";
+ }
+ typedef address-family {
+  type enumeration {
+   enum ipv4 {
+    description
+    "IPv4 address family.";
+   }
+   enum ipv6 {
+    description
+    "IPv6 address family.";
+   }
+  }
+  description
+  "Defines a type for the address family.";
+ }
+ /* Identities */
+ identity site-network-access-type {
+  description
+  "Base identity for site-network-access type.";
+ }
+ identity point-to-point {
+  base site-network-access-type;
+  description
+  "Identity for point-to-point connection.";
+ }
+ identity multipoint {
+  base site-network-access-type;
+  description
+  "Identity for multipoint connection.
+  Example: Ethernet broadcast segment.";
+ }
+ identity placement-diversity {
+  description
+  "Base identity for site placement constraints.";
+ }
+ identity bearer-diverse {
+  base placement-diversity;
+  description
+  "Identity for bearer diversity.
+  The bearers should not use common elements.";
+ }
+ identity pe-diverse {
+  base placement-diversity;
+  description
+  "Identity for PE diversity.";
+ }
+ identity pop-diverse {
+  base placement-diversity;
+  description
+  "Identity for POP diversity.";
+ }
+ identity linecard-diverse {
+  base placement-diversity;
+  description
+  "Identity for linecard diversity.";
+ }
+ identity same-pe {
+  base placement-diversity;
+  description
+  "Identity for having sites connected on the same PE.";
+ }
+ identity same-bearer {
+  base placement-diversity;
+  description
+  "Identity for having sites connected using the same bearer.";
+ }
+ identity site-vpn-flavor {
+  description
+  "Base identity for the site VPN service flavor.";
+ }
+ identity site-vpn-flavor-single {
+  base site-vpn-flavor;
+  description
+  "Base identity for the site VPN service flavor.
+  Used when the site belongs to only one VPN.";
+ }
+ identity site-vpn-flavor-multi {
+  base site-vpn-flavor;
+  description
+  "Base identity for the site VPN service flavor.
+  Used when a logical connection of a site
+  belongs to multiple VPNs.";
+ }
+ identity site-vpn-flavor-sub {
+  base site-vpn-flavor;
+  description
+  "Base identity for the site VPN service flavor.
+  Used when a site has multiple logical connections.
+  Each connection may belong to different multiple VPNs.";
+ }
+ identity site-vpn-flavor-nni {
+  base site-vpn-flavor;
+  description
+  "Base identity for the site VPN service flavor.
+  Used to describe an NNI option A connection.";
+ }
+ identity management {
+  description
+  "Base identity for site management scheme.";
+ }
+ identity co-managed {
+  base management;
+  description
+  "Base identity for co-managed site.";
+ }
+ identity customer-managed {
+  base management;
+  description
+  "Base identity for customer-managed site.";
+ }
+ identity provider-managed {
+  base management;
+  description
+  "Base identity for provider-managed site.";
+ }
+ identity site-role {
+  description
+  "Base identity for site type.";
+ }
+ identity any-to-any-role {
+  base site-role;
+  description
+  "Site in an any-to-any IP VPN.";
+ }
+ identity spoke-role {
+  base site-role;
+  description
+  "Spoke site in a Hub-and-Spoke IP VPN.";
+ }
+ identity hub-role {
+  base site-role;
+  description
+  "Hub site in a Hub-and-Spoke IP VPN.";
+ }
+ /* Groupings */
+ grouping customer-location-info {
+  container locations {
+   list location {
+    key location-id;
+    leaf location-id {
+     type svc-id;
+     description
+     "Identifier for a particular location.";
+    }
+    leaf address {
+     type string;
+     description
+     "Address (number and street) of the site.";
+    }
+    leaf postal-code {
+     type string;
+     description
+     "Postal code of the site.";
+    }
+    leaf state {
+     type string;
+     description
+     "State of the site.  This leaf can also be
+     used to describe a region for a country that
+     does not have states.";
+    }
+    leaf city {
+     type string;
+     description
+     "City of the site.";
+    }
+    leaf country-code {
+     type string {
+      pattern '[A-Z]{2}';
+     }
+     description
+     "Country of the site.
+     Expressed as ISO ALPHA-2 code.";
+    }
+    description
+    "Location of the site.";
+   }
+   description
+   "List of locations for the site.";
+  }
+  description
+  "This grouping defines customer location parameters.";
+ }
+ grouping site-group {
+  container groups {
+   list group {
+    key group-id;
+    leaf group-id {
+     type string;
+     description
+     "Group-id the site belongs to.";
+    }
+    description
+    "List of group-ids.";
+   }
+   description
+   "Groups the site or site-network-access belongs to.";
+  }
+  description
+  "Grouping definition to assign
+  group-ids to site or site-network-access.";
+ }
+ grouping site-diversity {
+  container site-diversity {
+   if-feature site-diversity;
+   uses site-group;
+   description
+   "Diversity constraint type.  All
+   site-network-accesses will inherit
+   the group values defined here.";
+  }
+  description
+  "This grouping defines site
+  diversity parameters.";
+ }
+ grouping access-diversity {
+  container access-diversity {
+   if-feature site-diversity;
+   uses site-group;
+   container constraints {
+    list constraint {
+     key constraint-type;
+     leaf constraint-type {
+      type identityref {
+       base placement-diversity;
+      }
+      description
+      "Diversity constraint type.";
+     }
+     container target {
+      choice target-flavor {
+       default id;
+       case id {
+        list group {
+         key group-id;
+         leaf group-id {
+          type string;
+          description
+          "The constraint will be applied against
+          this particular group-id for this site
+          network access level.";
+         }
+         description
+         "List of group-ids associated with one specific
+         constraint for this site network access level.";
+        }
+       }
+       case all-accesses {
+        leaf all-other-accesses {
+         type empty;
+         description
+         "The constraint will be applied against
+         all other site network accesses of this site.";
+        }
+       }
+       case all-groups {
+        leaf all-other-groups {
+         type empty;
+         description
+         "The constraint will be applied against
+         all other groups managed by the customer.";
+        }
+       }
+       description
+       "Choice for the target flavor definition.";
+      }
+      description
+      "The constraint will be applied against a
+      Specific target, and the target can be a list
+      of group-ids,all other site network accesses of
+      this site, or all other groups managed by the
+      customer.";
+     }
+     description
+     "List of constraints.";
+    }
+    description
+    "Placement constraints for this site network access.";
+   }
+   description
+   "Diversity parameters.";
+  }
+  description
+  "This grouping defines access diversity parameters.";
+ }
+ grouping operational-requirements {
+   leaf requested-site-start {
+    type yang:date-and-time;
+     description
+     "Optional leaf indicating requested date and
+     time when the service at a particular site is
+     expected to start.";
+  }
+
+  leaf requested-site-stop {
+    type yang:date-and-time;
+     description
+     "Optional leaf indicating requested date and
+     time when the service at a particular site is
+     expected to stop.";
+  }
+  description
+  "This grouping defines some operational
+  parameters.";
+ }
+ grouping operational-requirements-ops {
+   leaf actual-site-start {
+    type yang:date-and-time;
+    config false;
+     description
+     "Optional leaf indicating actual date and
+     time when the service at a particular site
+     actually started.";
+  }
+  leaf actual-site-stop {
+   type yang:date-and-time;
+   config false;
+     description
+     "Optional leaf indicating actual date and
+     time when the service at a particular site
+     actually stopped.";
+  }
+  description
+  "This grouping defines some operational
+  parameters.";
+ }
+ grouping site-attachment-bearer {
+  container bearer {
+   container requested-type {
+    if-feature requested-type;
+    leaf requested-type {
+     type string;
+     description
+     "Type of requested bearer: Ethernet, DSL,
+     Wireless, etc. Operator specific.";
+    }
+    leaf strict {
+     type boolean;
+     default false;
+     description
+     "Defines whether requested-type is a preference
+     or a strict requirement.";
+    }
+     description
+     "Container for requested-type.";
+   }
+   leaf always-on {
+    if-feature always-on;
+    type boolean;
+    default true;
+     description
+     "Request for an always-on access type.
+     For example, this could mean no dial access type.";
+   }
+   leaf bearer-reference {
+    if-feature bearer-reference;
+    type string;
+     description
+     "This is an internal reference for the SP.";
+   }
+     description
+     "Bearer-specific parameters.
+     To be augmented.";
+  }
+  description
+  "Defines physical properties of a site attachment.";
+ }
+ grouping site-management {
+  container management {
+   leaf type {
+    type identityref {
+     base management;
+    }
+    mandatory true;
+    description
+    "Management type of the connection.";
+   }
+   description
+   "Management configuration.";
+  }
+  description
+  "Management parameters for the site.";
+ }
+ grouping site-devices {
+  container devices {
+   when "derived-from-or-self(../management/type, "+
+   "'svc:provider-managed') or "+
+   "derived-from-or-self(../management/type, 'svc:co-managed')" {
+   description
+   "Applicable only for provider-managed or
+   co-managed device.";
+  }
+  list device {
+   key device-id;
+   leaf device-id {
+    type svc-id;
+    description
+    "Identifier for the device.";
+   }
+   leaf location {
+    type leafref {
+     path "../../../locations/"+
+     "location/location-id";
+    }
+    mandatory true;
+    description
+     "Location of the device.";
+    }
+   container management {
+    when "derived-from-or-self(../../../management/type,"+
+      "'svc:co-managed')" {
+      description
+       "Applicable only for co-managed device.";
+     }
+    leaf address-family {
+     type address-family;
+     description
+     "Address family used for management.";
+    }
+    leaf address {
+         when "(../address-family)" {
+           description
+           "If address-family is specified, then address should
+           also be specified.  If address-family is not specified,
+           then address should also not be specified.";
+           }
+         type inet:ip-address;
+         mandatory true;
+     description
+     "Management address.";
+     }
+    description
+     "Management configuration.  Applicable only for
+      co-managed device.";
+    }
+    description
+    "List of devices requested by customer.";
+   }
+   description
+   "Device configuration.";
+  }
+  description
+  "Grouping for device allocation.";
+ }
+ grouping site-attachment-availability {
+  container availability {
+   leaf access-priority {
+    type uint32;
+    default 100;
+    description
+    "Defines the priority for the access.
+    The higher the access-priority value,
+    the higher the preference of the
+    access will be.";
+   }
+   description
+   "Availability parameters (used for multihoming).";
+  }
+  description
+  "Defines availability parameters for a site.";
+ }
+ grouping site-top-level-cfg {
+  uses operational-requirements;
+  uses customer-location-info;
+  uses site-devices;
+  uses site-diversity;
+  uses site-management;
+  description
+  "Grouping for site top-level configuration.";
+ }
+ grouping site-network-access-top-level-cfg {
+  leaf site-network-access-type {
+   type identityref {
+    base site-network-access-type;
+   }
+   default point-to-point;
+   description
+   "Describes the type of connection, e.g.,
+   point-to-point or multipoint.";
+  }
+  choice location-flavor {
+   case location {
+    when "derived-from-or-self(../../management/type, "+
+     "'svc:customer-managed')" {
+     description
+     "Applicable only for customer-managed device.";
+    }
+    leaf location-reference {
+     type leafref {
+      path "../../../locations/location/location-id";
+     }
+     description
+     "Location of the site-network-access.";
+    }
+   }
+   case device {
+    when "derived-from-or-self(../../management/type, "+
+     "'svc:provider-managed') or "+
+     "derived-from-or-self(../../management/type, "+
+     "'svc:co-managed')" {
+     description
+     "Applicable only for provider-managed or co-managed device.";
+    }
+    leaf device-reference {
+     type leafref {
+      path "../../../devices/device/device-id";
+     }
+     description
+     "Identifier of CE to use.";
+    }
+   }
+   mandatory true;
+   description
+   "Choice of how to describe the site's location.";
+  }
+  uses access-diversity;
+  uses site-attachment-bearer;
+  description
+  "Grouping for site network access top-level configuration.";
+ }
+ /* Main blocks */
+ container svc {
+  container sites {
+   list site {
+    key site-id;
+    leaf site-id {
+     type svc-id;
+     description
+     "Identifier of the site.";
+    }
+    uses site-top-level-cfg;
+    uses operational-requirements-ops;
+    container site-network-accesses {
+     list site-network-access {
+      key site-network-access-id;
+      leaf site-network-access-id {
+       type svc-id;
+       description
+       "Identifier for the access.";
+      }
+      uses site-network-access-top-level-cfg;
+      description
+      "List of accesses for a site.";
+     }
+     description
+     "List of accesses for a site.";
+    }
+    description
+    "List of sites.";
+   }
+   description
+   "Container for sites.";
+  }
+  description
+  "Main container for service configuration.";
+ }
+}
