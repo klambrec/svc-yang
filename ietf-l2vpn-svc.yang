@@ -9,23 +9,24 @@ module ietf-l2vpn-svc {
   import ietf-yang-types {
     prefix yang;
   }
+  import ietf-svc {
+    prefix svc;
+  }
   import ietf-netconf-acm {
     prefix nacm;
   }
 
   organization
-    "IETF L2SM Working Group.";
+    "IETF ONSEN Working Group.";
   contact
-    "WG Web:   <https://datatracker.ietf.org/wg/l2sm/>
-     WG List:  <mailto:l2sm@ietf.org>
-     Editor:   Giuseppe Fioccola
-               <mailto:giuseppe.fioccola@tim.it>";
+    "Kris Lambrechts
+     Email: kris@netedge.plus";
   description
     "This YANG module defines a generic service configuration model
      for Layer 2 VPN services common across all vendor
      implementations.
 
-     Copyright (c) 2018 IETF Trust and the persons
+     Copyright (c) 2026 IETF Trust and the persons
      identified as authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -33,11 +34,14 @@ module ietf-l2vpn-svc {
      to the license terms contained in, the Simplified BSD License
      set forth in Section 4.c of the IETF Trust's Legal Provisions
      Relating to IETF Documents
-     (https://trustee.ietf.org/license-info).
+     (https://trustee.ietf.org/license-info).";
 
-     This version of this YANG module is part of RFC 8466;
-     see the RFC itself for full legal notices.";
-
+  revision 2026-02-06 {
+    description
+      "Revision of RFC 8466 to enable a shared service model.";
+    reference
+      "RFC XXXX";
+  }
   revision 2018-10-09 {
     description
       "Initial revision.";
@@ -107,30 +111,9 @@ module ietf-l2vpn-svc {
       "Enables the support of signaling options.";
   }
 
-  feature site-diversity {
-    description
-      "Enables the support of site diversity constraints in a VPN.";
-  }
-
   feature encryption {
     description
       "Enables the support of encryption.";
-  }
-
-  feature always-on {
-    description
-      "Enables support for the 'always-on' access constraint.";
-  }
-
-  feature requested-type {
-    description
-      "Enables support for the 'requested-type' access constraint.";
-  }
-
-  feature bearer-reference {
-    description
-      "Enables support for the 'bearer-reference' access
-       constraint.";
   }
 
   feature qos {
@@ -272,24 +255,6 @@ module ietf-l2vpn-svc {
     }
     description
       "Defines the type of negotiation mode.";
-  }
-
-  identity site-network-access-type {
-    description
-      "Base identity for the site-network-access type.";
-  }
-
-  identity point-to-point {
-    base site-network-access-type;
-    description
-      "Identity for a point-to-point connection.";
-  }
-
-  identity multipoint {
-    base site-network-access-type;
-    description
-      "Identity for a multipoint connection, e.g.,
-       an Ethernet broadcast segment.";
   }
 
   identity tag-type {
@@ -1718,7 +1683,7 @@ module ietf-l2vpn-svc {
               case deny-any-except {
                 leaf-list permit-site {
                   type leafref {
-                    path "/l2vpn-svc/sites/site/site-id";
+                    path "/svc:svc/svc:sites/svc:site/svc:site-id";
                   }
                   description
                     "Site ID to be authorized.";
@@ -1727,7 +1692,7 @@ module ietf-l2vpn-svc {
               case permit-any-except {
                 leaf-list deny-site {
                   type leafref {
-                    path "/l2vpn-svc/sites/site/site-id";
+                    path "/svc:svc/svc:sites/svc:site/svc:site-id";
                   }
                   description
                     "Site ID to be denied.";
@@ -1863,14 +1828,11 @@ module ietf-l2vpn-svc {
       description
         "Container for VPN services.";
     }
-    container sites {
-      list site {
-        key "site-id";
-        leaf site-id {
-          type string;
-          description
-            "Identifier of the site.";
-        }
+    description
+      "Container for L2VPN services.";
+  }
+
+ augment "/svc:svc/svc:sites/svc:site" {
         leaf site-vpn-flavor {
           type identityref {
             base site-vpn-flavor;
@@ -1881,143 +1843,6 @@ module ietf-l2vpn-svc {
              done, e.g., whether the site belongs to
              a single VPN site or a multi-VPN site.  By
              default, the site belongs to a single VPN.";
-        }
-        container devices {
-          when "derived-from-or-self(../management/type, "
-             + "'l2vpn-svc:provider-managed') or "
-             + "derived-from-or-self(../management/type, "
-             + "'l2vpn-svc:co-managed')" {
-            description
-              "Applicable only for a provider-managed or
-               co-managed device.";
-          }
-          list device {
-            key "device-id";
-            leaf device-id {
-              type string;
-              description
-                "Identifier for the device.";
-            }
-            leaf location {
-              type leafref {
-                path "../../../locations/location/location-id";
-              }
-              mandatory true;
-              description
-                "Location of the device.";
-            }
-            container management {
-              when "derived-from-or-self(../../../management/type, "
-                 + "'l2vpn-svc:co-managed')" {
-                description
-                  "Applicable only for a co-managed device.";
-              }
-              leaf transport {
-                type identityref {
-                  base address-family;
-                }
-                description
-                  "Transport protocol or address family
-                   used for management.";
-              }
-              leaf address {
-                when '(../ transport)' {
-                  description
-                    "If the address family is specified, then the
-                     address should also be specified.  If the
-                     transport is not specified, then the address
-                     should not be specified.";
-                }
-                type inet:ip-address;
-                description
-                  "Management address.";
-              }
-              description
-                "Management configuration.  Applicable only for a
-                 co-managed device.";
-            }
-            description
-              "List of devices requested by the customer.";
-          }
-          description
-            "Device configurations.";
-        }
-        container management {
-          leaf type {
-            type identityref {
-              base management;
-            }
-            mandatory true;
-            description
-              "Management type of the connection.";
-          }
-          description
-            "Management configuration.";
-        }
-        container locations {
-          list location {
-            key "location-id";
-            leaf location-id {
-              type string;
-              description
-                "Location ID.";
-            }
-            leaf address {
-              type string;
-              description
-                "Address (number and street) of the site.";
-            }
-            leaf postal-code {
-              type string;
-              description
-                "Postal code of the site.  The format of 'postal-code'
-                 is similar to the 'PC' (postal code) label format
-                 defined in RFC 4119.";
-            }
-            leaf state {
-              type string;
-              description
-                "State (region) of the site.  This leaf can also be used
-                 to describe a region of a country that does not have
-                 states.";
-            }
-            leaf city {
-              type string;
-              description
-                "City of the site.";
-            }
-            leaf country-code {
-              type string;
-              description
-                "Country of the site.  The format of 'country-code' is
-                 similar to the 'country' label defined in RFC 4119.";
-            }
-            description
-              "List of locations.";
-          }
-          description
-            "Location of the site.";
-        }
-        container site-diversity {
-          if-feature "site-diversity";
-          container groups {
-            list group {
-              key "group-id";
-              leaf group-id {
-                type string;
-                description
-                  "The group-id to which the site belongs.";
-              }
-              description
-                "List of group-ids.";
-            }
-            description
-              "Groups to which the site belongs.
-               All site network accesses will inherit those group
-               values.";
-          }
-          description
-            "The type of diversity constraint.";
         }
         container vpn-policies {
           list vpn-policy {
@@ -2109,20 +1934,6 @@ module ietf-l2vpn-svc {
         uses site-bum;
         uses site-mac-loop-prevention;
         uses site-acl;
-        leaf actual-site-start {
-          type yang:date-and-time;
-          config false;
-          description
-            "This leaf is optional.  It indicates the date and time
-             when the service at a particular site actually started.";
-        }
-        leaf actual-site-stop {
-          type yang:date-and-time;
-          config false;
-          description
-            "This leaf is optional.  It indicates the date and time
-             when the service at a particular site actually stopped.";
-        }
         leaf bundling-type {
           type identityref {
             base bundling-type;
@@ -2135,18 +1946,17 @@ module ietf-l2vpn-svc {
         }
         leaf default-ce-vlan-id {
           type uint32;
-          mandatory true;
           description
             "Default CE VLAN ID set at the site level.";
         }
-        container site-network-accesses {
-          list site-network-access {
-            key "network-access-id";
-            leaf network-access-id {
-              type string;
-              description
-                "Identifier of network access.";
-            }
+    }
+
+
+
+
+
+
+ augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access" {
             leaf remote-carrier-name {
               when "derived-from-or-self(../../../site-vpn-flavor,"
                  + "'l2vpn-svc:site-vpn-flavor-nni')" {
@@ -2166,165 +1976,6 @@ module ietf-l2vpn-svc {
                  If it is not set, it indicates that the customer
                  does not know the remote carrier's name
                  beforehand.";
-            }
-            leaf type {
-              type identityref {
-                base site-network-access-type;
-              }
-              default "point-to-point";
-              description
-                "Describes the type of connection, e.g.,
-                 point-to-point or multipoint.";
-            }
-            choice location-flavor {
-              case location {
-                when "derived-from-or-self(../../management/type, "
-                   + "'l2vpn-svc:customer-managed')" {
-                  description
-                    "Applicable only for a customer-managed device.";
-                }
-                leaf location-reference {
-                  type leafref {
-                    path "../../../locations/location/location-id";
-                  }
-                  description
-                    "Location of the site-network-access.";
-                }
-              }
-              case device {
-                when "derived-from-or-self(../../management/type, "
-                   + "'l2vpn-svc:provider-managed') or "
-                   + "derived-from-or-self(../../management/type, "
-                   + "'l2vpn-svc:co-managed')" {
-                  description
-                    "Applicable only for a provider-managed
-                     or co-managed device.";
-                }
-                leaf device-reference {
-                  type leafref {
-                    path "../../../devices/device/device-id";
-                  }
-                  description
-                    "Identifier of the CE to use.";
-                }
-              }
-              mandatory true;
-              description
-                "Choice of how to describe the site's location.";
-            }
-            container access-diversity {
-              if-feature "site-diversity";
-              container groups {
-                list group {
-                  key "group-id";
-                  leaf group-id {
-                    type string;
-                    description
-                      "Group-id to which the site belongs.";
-                  }
-                  description
-                    "List of group-ids.";
-                }
-                description
-                  "Groups to which the site or site-network-access
-                   belongs.";
-              }
-              container constraints {
-                list constraint {
-                  key "constraint-type";
-                  leaf constraint-type {
-                    type identityref {
-                      base placement-diversity;
-                    }
-                    description
-                      "The type of diversity constraint.";
-                  }
-                  container target {
-                    choice target-flavor {
-                      default "id";
-                      case id {
-                        list group {
-                          key "group-id";
-                          leaf group-id {
-                            type string;
-                            description
-                              "The constraint will apply against this
-                               particular group-id.";
-                          }
-                          description
-                            "List of groups.";
-                        }
-                      }
-                      case all-accesses {
-                        leaf all-other-accesses {
-                          type empty;
-                          description
-                            "The constraint will apply against all other
-                             site network accesses of this site.";
-                        }
-                      }
-                      case all-groups {
-                        leaf all-other-groups {
-                          type empty;
-                          description
-                            "The constraint will apply against all other
-                             groups the customer is managing.";
-                        }
-                      }
-                      description
-                        "Choice for the group definition.";
-                    }
-                    description
-                      "The constraint will apply against
-                       this list of groups.";
-                  }
-                  description
-                    "List of constraints.";
-                }
-                description
-                  "Constraints for placing this site network access.";
-              }
-              description
-                "Diversity parameters.";
-            }
-            container bearer {
-              container requested-type {
-                if-feature "requested-type";
-                leaf type {
-                  type string;
-                  description
-                    "Type of requested bearer: Ethernet, ATM, Frame
-                     Relay, IP Layer 2 transport, Frame Relay Data
-                     Link Connection Identifier (DLCI), SONET/SDH,
-                     PPP.";
-                }
-                leaf strict {
-                  type boolean;
-                  default "false";
-                  description
-                    "Defines whether the requested type is a preference
-                     or a strict requirement.";
-                }
-                description
-                  "Container for requested types.";
-              }
-              leaf always-on {
-                if-feature "always-on";
-                type boolean;
-                default "true";
-                description
-                  "Request for an 'always-on' access type.
-                   For example, this could mean no dial-in access
-                   type.";
-              }
-              leaf bearer-reference {
-                if-feature "bearer-reference";
-                type string;
-                description
-                  "An internal reference for the SP.";
-              }
-              description
-                "Bearer-specific parameters.  To be augmented.";
             }
             container connection {
               leaf encapsulation-type {
@@ -2375,7 +2026,6 @@ module ietf-l2vpn-svc {
                   }
                   leaf cvlan-id {
                     type uint16;
-                    mandatory true;
                     description
                       "VLAN identifier.";
                   }
@@ -2420,13 +2070,11 @@ module ietf-l2vpn-svc {
                   }
                   leaf svlan-id {
                     type uint16;
-                    mandatory true;
                     description
                       "SVLAN identifier.";
                   }
                   leaf cvlan-id {
                     type uint16;
-                    mandatory true;
                     description
                       "CVLAN identifier.";
                   }
@@ -2452,7 +2100,6 @@ module ietf-l2vpn-svc {
                   }
                   leaf svlan-id {
                     type uint16;
-                    mandatory true;
                     description
                       "SVLAN ID.";
                   }
@@ -2469,7 +2116,6 @@ module ietf-l2vpn-svc {
                   if-feature "vxlan";
                   leaf vni-id {
                     type uint32;
-                    mandatory true;
                     description
                       "VXLAN Network Identifier (VNI).";
                   }
@@ -2824,7 +2470,6 @@ module ietf-l2vpn-svc {
                 if-feature "ethernet-oam";
                 leaf md-name {
                   type string;
-                  mandatory true;
                   description
                     "Maintenance domain name.";
                 }
@@ -2832,7 +2477,6 @@ module ietf-l2vpn-svc {
                   type uint16 {
                     range "0..255";
                   }
-                  mandatory true;
                   description
                     "Maintenance domain level.  The level may be
                      restricted in certain protocols (e.g.,
@@ -2843,7 +2487,6 @@ module ietf-l2vpn-svc {
                   key "maid";
                   leaf maid {
                     type string;
-                    mandatory true;
                     description
                       "Identifies a Maintenance Association (MA).";
                   }
@@ -3248,7 +2891,6 @@ module ietf-l2vpn-svc {
               leaf svc-mtu {
                 type uint16;
                 units "bytes";
-                mandatory true;
                 description
                   "SVC MTU.  It is also known as the maximum
                    transmission unit or maximum frame size.  When
@@ -3300,19 +2942,5 @@ module ietf-l2vpn-svc {
               description
                 "Container of MAC address limit configurations.";
             }
-            description
-              "List of site network accesses.";
-          }
-          description
-            "Container of port configurations.";
         }
-        description
-          "List of sites.";
-      }
-      description
-        "Container of site configurations.";
-    }
-    description
-      "Container for L2VPN services.";
-  }
 }

@@ -31,6 +31,8 @@ module ietf-svc {
  revision 2026-02-06 {
   description
   "Initial document.";
+  reference
+   "RFC XXXX";
   }
  /* Features */
  feature site-diversity {
@@ -124,36 +126,6 @@ module ietf-svc {
   base placement-diversity;
   description
   "Identity for having sites connected using the same bearer.";
- }
- identity site-vpn-flavor {
-  description
-  "Base identity for the site VPN service flavor.";
- }
- identity site-vpn-flavor-single {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used when the site belongs to only one VPN.";
- }
- identity site-vpn-flavor-multi {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used when a logical connection of a site
-  belongs to multiple VPNs.";
- }
- identity site-vpn-flavor-sub {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used when a site has multiple logical connections.
-  Each connection may belong to different multiple VPNs.";
- }
- identity site-vpn-flavor-nni {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used to describe an NNI option A connection.";
  }
  identity management {
   description
@@ -576,6 +548,7 @@ module ietf-svc {
   }
   uses access-diversity;
   uses site-attachment-bearer;
+  uses site-attachment-availability;
   description
   "Grouping for site network access top-level configuration.";
  }
