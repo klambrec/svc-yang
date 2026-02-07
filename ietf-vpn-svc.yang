@@ -1,0 +1,339 @@
+module ietf-vpn-svc {
+ yang-version 1.1;
+ namespace "urn:ietf:params:xml:ns:yang:ietf-vpn-svc";
+ prefix vpn-svc;
+  import ietf-svc {
+  prefix svc;
+ }
+ import ietf-netconf-acm {
+  prefix nacm;
+ }
+ organization
+  "IETF ONSEN Working Group";
+ contact
+  "Kris Lambrechts
+   Email: kris@netedge.plus";
+ description
+ "This YANG module defines a generic base for VPN service
+ configuration models. This model is common across all
+ vendor implementations.
+
+ Copyright (c) 2026 IETF Trust and the persons
+ identified as authors of the code.  All rights reserved.
+
+ Redistribution and use in source and binary forms, with or
+ without modification, is permitted pursuant to, and subject
+ to the license terms contained in, the Simplified BSD License
+ set forth in Section 4.c of the IETF Trust's Legal Provisions
+ Relating to IETF Documents
+ (https://trustee.ietf.org/license-info).";
+
+ revision 2026-02-06 {
+  description
+  "Initial document.";
+  reference
+   "RFC XXXX";
+  }
+ /* Features */
+
+
+  feature carrierscarrier {
+    description
+      "Enables the support of carriers' carriers (CsC).";
+  }
+ 
+  feature extranet-vpn {
+    description
+      "Enables the support of extranet VPNs.";
+  }
+ 
+  feature cloud-access {
+    description
+      "Allows the VPN to connect to a Cloud Service Provider (CSP)
+       or an ISP.";
+  }
+ /* Typedefs */
+
+ /* Identities */
+  identity service-type {
+    description
+      "Base identity of the service type.";
+  }
+
+  identity vpn-topology {
+    description
+      "Base identity for the VPN topology.";
+  }
+
+  identity any-to-any {
+    base vpn-topology;
+    description
+      "Identity for the any-to-any VPN topology.";
+  }
+
+  identity hub-spoke {
+    base vpn-topology;
+    description
+      "Identity for the Hub-and-Spoke VPN topology.";
+  }
+
+  identity hub-spoke-disjoint {
+    base vpn-topology;
+    description
+      "Identity for the Hub-and-Spoke VPN topology,
+       where Hubs cannot communicate with each other.";
+  }
+
+  identity site-role {
+    description
+      "Base identity for a site type.";
+  }
+
+  identity any-to-any-role {
+    base site-role;
+    description
+      "Site in an any-to-any L2VPN.";
+  }
+
+  identity spoke-role {
+    base site-role;
+    description
+      "Spoke site in a Hub-and-Spoke L2VPN.";
+  }
+
+  identity hub-role {
+    base site-role;
+    description
+      "Hub site in a Hub-and-Spoke L2VPN.";
+  }
+
+  identity site-vpn-flavor {
+    description
+      "Base identity for the site VPN service flavor.";
+  }
+
+  identity site-vpn-flavor-single {
+    base site-vpn-flavor;
+    description
+      "Identity for the site VPN service flavor.
+       Used when the site belongs to only one VPN.";
+  }
+
+  identity site-vpn-flavor-multi {
+    base site-vpn-flavor;
+    description
+      "Identity for the site VPN service flavor.
+       Used when a logical connection of a site
+       belongs to multiple VPNs.";
+  }
+  identity site-vpn-flavor-nni {
+    base site-vpn-flavor;
+    description
+      "Identity for the site VPN service flavor.
+       Used to describe an NNI option A connection.";
+  }
+ /* Groupings */
+
+ /* Main blocks */
+ augment "/svc:svc" {
+  container vpn-services {
+   list vpn-service {
+     key "vpn-id";
+     leaf vpn-id {
+       type svc:svc-id;
+       description
+         "Defines a service identifier.";
+     }
+     leaf vpn-service-type {
+       type identityref {
+         base service-type;
+       }
+       description
+         "Service type.";
+     }
+     leaf customer-name {
+       type string;
+       description
+         "Customer name.";
+     }
+     leaf vpn-service-topology {
+       type identityref {
+         base vpn-topology;
+       }
+       default "any-to-any";
+       description
+         "Defines the service topology, e.g.,
+          'any-to-any', 'hub-spoke'.";
+     }
+     container cloud-accesses {
+       if-feature "cloud-access";
+       list cloud-access {
+         key "cloud-identifier";
+         leaf cloud-identifier {
+           type leafref {
+             path "/svc:svc/vpn-profiles/"
+                + "valid-provider-identifiers"
+                + "/cloud-identifier/id";
+           }
+           description
+             "Identification of the cloud service.
+              Local to each administration.";
+         }
+         choice list-flavor {
+           case permit-any {
+             leaf permit-any {
+               type empty;
+               description
+                 "Allow all sites.";
+             }
+           }
+           case deny-any-except {
+             leaf-list permit-site {
+               type leafref {
+                 path "/svc:svc/svc:sites/svc:site/svc:site-id";
+               }
+               description
+                 "Site ID to be authorized.";
+             }
+           }
+           case permit-any-except {
+             leaf-list deny-site {
+               type leafref {
+                 path "/svc:svc/svc:sites/svc:site/svc:site-id";
+               }
+               description
+                 "Site ID to be denied.";
+             }
+           }
+           description
+             "Choice for cloud access policy.
+              By default, all sites in the L2VPN
+              MUST be authorized to access the cloud.";
+         }
+         description
+           "Cloud access configuration.";
+       }
+       description
+         "Container for cloud access configurations.";
+     }
+     container extranet-vpns {
+       if-feature "extranet-vpn";
+       list extranet-vpn {
+         key "vpn-id";
+         leaf vpn-id {
+           type svc:svc-id;
+           description
+             "Identifies the target VPN that the local VPN wants to
+              access.";
+         }
+         leaf local-sites-role {
+           type identityref {
+             base site-role;
+           }
+           default "any-to-any-role";
+           description
+             "Describes the role of the local sites in the target
+              VPN topology.  In the any-to-any VPN service topology,
+              the local sites must have the same role, which will be
+              'any-to-any-role'.  In the Hub-and-Spoke VPN service
+              topology or the Hub-and-Spoke-Disjoint VPN service
+              topology, the local sites must have a Hub role or a
+              Spoke role.";
+         }
+         description
+           "List of extranet VPNs to which the local VPN
+            is attached.";
+       }
+       description
+         "Container for extranet VPN configurations.";
+     }
+     leaf ce-vlan-preservation {
+       type boolean;
+       mandatory true;
+       description
+         "Preserves the CE-VLAN ID from ingress to egress, i.e.,
+          the CE-VLAN tag of the egress frame is identical to
+          that of the ingress frame that yielded this
+          egress service frame.  If all-to-one bundling within
+          a site is enabled, then preservation applies to all
+          ingress service frames.  If all-to-one bundling is
+          disabled, then preservation applies to tagged
+          ingress service frames having CE-VLAN IDs 1 through 4094.";
+     }
+     leaf ce-vlan-cos-preservation {
+       type boolean;
+       mandatory true;
+       description
+         "CE VLAN CoS preservation.  The PCP bits in the CE-VLAN tag
+          of the egress frame are identical to those of the
+          ingress frame that yielded this egress service frame.";
+     }
+     leaf carrierscarrier {
+       if-feature "carrierscarrier";
+       type boolean;
+       default "false";
+       description
+         "The VPN is using CsC, and so MPLS is required.";
+     }
+     description
+       "List of VPN services.";
+   }
+   description
+     "Container for VPN services.";
+  }
+  container vpn-profiles {
+   container valid-provider-identifiers {
+    list cloud-identifier {
+     if-feature cloud-access;
+     key id;
+     leaf id {
+      type string;
+      description
+      "Identification of cloud service.
+      Local administration meaning.";
+     }
+     description
+     "List for Cloud Identifiers.";
+    }
+    list encryption-profile-identifier {
+     key id;
+     leaf id {
+      type string;
+      description
+      "Identification of the SP encryption profile
+      to be used.  Local administration meaning.";
+     }
+     description
+     "List for encryption profile identifiers.";
+    }
+    list qos-profile-identifier {
+     key id;
+     leaf id {
+      type string;
+      description
+      "Identification of the QoS Profile to be used.
+      Local administration meaning.";
+     }
+     description
+     "List for QoS Profile Identifiers.";
+    }
+    list bfd-profile-identifier {
+     key id;
+     leaf id {
+      type string;
+      description
+      "Identification of the SP BFD Profile to be used.
+      Local administration meaning.";
+     }
+     description
+     "List for BFD Profile identifiers.";
+    }
+      nacm:default-deny-write;
+      description
+      "Container for Valid Provider Identifies.";
+   }
+    description
+    "Container for VPN Profiles.";
+  } 
+ }
+}

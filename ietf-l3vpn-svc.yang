@@ -11,8 +11,8 @@ module ietf-l3vpn-svc {
  import ietf-svc {
   prefix svc;
  }
- import ietf-netconf-acm {
-  prefix nacm;
+ import ietf-vpn-svc {
+  prefix vpn-svc;
  }
  organization
   "IETF ONSEN Working Group";
@@ -284,35 +284,12 @@ identity urllc {
    rate, latency, loss rate, reliability, and many
    other parameters.";
  }
- identity site-vpn-flavor {
-  description
-  "Base identity for the site VPN service flavor.";
- }
- identity site-vpn-flavor-single {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used when the site belongs to only one VPN.";
- }
- identity site-vpn-flavor-multi {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used when a logical connection of a site
-  belongs to multiple VPNs.";
- }
  identity site-vpn-flavor-sub {
-  base site-vpn-flavor;
+  base vpn-svc:site-vpn-flavor;
   description
   "Base identity for the site VPN service flavor.
   Used when a site has multiple logical connections.
   Each connection may belong to different multiple VPNs.";
- }
- identity site-vpn-flavor-nni {
-  base site-vpn-flavor;
-  description
-  "Base identity for the site VPN service flavor.
-  Used to describe an NNI option A connection.";
  }
  identity management {
   description
@@ -381,26 +358,6 @@ identity urllc {
   base site-role;
   description
   "Hub site in a Hub-and-Spoke IP VPN.";
- }
- identity vpn-topology {
-  description
-  "Base identity for VPN topology.";
- }
- identity any-to-any {
-  base vpn-topology;
-  description
-  "Identity for any-to-any VPN topology.";
- }
- identity hub-spoke {
-  base vpn-topology;
-  description
-  "Identity for Hub-and-Spoke VPN topology.";
- }
- identity hub-spoke-disjoint {
-  base vpn-topology;
-  description
-  "Identity for Hub-and-Spoke VPN topology
-  where Hubs cannot communicate with each other.";
  }
  identity multicast-tree-type {
   description
@@ -573,86 +530,6 @@ identity urllc {
    and Site-to-WAN direction.";
  }
  /* Groupings */
- grouping vpn-service-cloud-access {
-  container cloud-accesses {
-   if-feature cloud-access;
-   list cloud-access {
-    key cloud-identifier;
-    leaf cloud-identifier {
-     type leafref {
-      path "/l3vpn-svc/vpn-profiles/"+
-      "valid-provider-identifiers/cloud-identifier/id";
-     }
-     description
-     "Identification of cloud service.
-     Local administration meaning.";
-    }
-    choice list-flavor {
-     case permit-any {
-      leaf permit-any {
-       type empty;
-       description
-       "Allows all sites.";
-      }
-     }
-     case deny-any-except {
-      leaf-list permit-site {
-       type leafref {
-        path "/svc:svc/svc:sites/svc:site/svc:site-id";
-       }
-       description
-       "Site ID to be authorized.";
-      }
-     }
-     case permit-any-except {
-      leaf-list deny-site {
-       type leafref {
-       path "/svc:svc/svc:sites/svc:site/svc:site-id";
-      }
-      description
-      "Site ID to be denied.";
-      }
-     }
-     description
-     "Choice for cloud access policy.  By
-     default, all sites in the IP VPN MUST
-     be authorized to access the cloud.";
-    }
-    container address-translation {
-     container nat44 {
-      leaf enabled {
-       type boolean;
-        default false;
-        description
-        "Controls whether or not Network address
-        translation from IPv4 to IPv4 (NAT44)
-        [RFC3022] is required.";
-      }
-      leaf nat44-customer-address {
-       type inet:ipv4-address;
-        description
-        "Address to be used for network address
-        translation from IPv4 to IPv4.  This is
-        to be used if the customer is providing
-        the IPv4 address.  If the customer address
-        is not set, the model assumes that the
-        provider will allocate the address.";
-      }
-      description
-      "IPv4-to-IPv4 translation.";
-     }
-     description
-     "Container for NAT.";
-    }
-    description
-    "Cloud access configuration.";
-   }
-   description
-   "Container for cloud access configurations.";
-  }
-  description
-  "Grouping for VPN cloud definition.";
- }
  grouping multicast-rp-group-cfg {
   choice group-format {
    mandatory true;
@@ -809,17 +686,6 @@ identity urllc {
   }
   description
   "Grouping for multicast VPN definition.";
- }
- grouping vpn-service-mpls {
-  leaf carrierscarrier {
-   if-feature carrierscarrier;
-    type boolean;
-    default false;
-    description
-    "The VPN is using CsC, and so MPLS is required.";
-  }
-  description
-  "Grouping for MPLS CsC definition.";
  }
  grouping flow-definition {
   container match-flow {
@@ -1079,8 +945,8 @@ identity urllc {
       "Standard QoS profile.";
       leaf profile {
        type leafref {
-       path "/l3vpn-svc/vpn-profiles/valid-provider-identifiers"+
-           "/qos-profile-identifier/id";
+       path "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers"+
+           "/vpn-svc:qos-profile-identifier/vpn-svc:id";
        }
        description
        "QoS profile to be used.";
@@ -1252,8 +1118,8 @@ identity urllc {
      case provider-profile {
       leaf profile-name {
        type leafref {
-        path "/l3vpn-svc/vpn-profiles/valid-provider-identifiers"+
-                "/encryption-profile-identifier/id";
+        path "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers"+
+                "/vpn-svc:encryption-profile-identifier/vpn-svc:id";
        }
          description
          "Name of the SP profile to be applied.";
@@ -1878,8 +1744,8 @@ identity urllc {
       case profile {
        leaf profile-name {
         type leafref {
-         path "/l3vpn-svc/vpn-profiles/valid-provider-identifiers/"+
-                 "bfd-profile-identifier/id";
+         path "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers/"+
+                 "vpn-svc:bfd-profile-identifier/vpn-svc:id";
         }
         description
         "Well-known SP profile name.  The provider can propose
@@ -1982,9 +1848,9 @@ identity urllc {
  grouping site-vpn-flavor {
   leaf site-vpn-flavor {
    type identityref {
-    base site-vpn-flavor;
+    base vpn-svc:site-vpn-flavor;
    }
-   default site-vpn-flavor-single;
+   default "vpn-svc:site-vpn-flavor-single";
    description
    "Defines the way the VPN multiplexing is done, e.g., whether
    the site belongs to a single VPN site or a multiVPN; or, in the case
@@ -2069,8 +1935,8 @@ identity urllc {
       key vpn-id;
       leaf vpn-id {
        type leafref {
-        path "/l3vpn-svc/vpn-services/"+
-         "vpn-service/vpn-id";
+        path "/svc:svc/vpn-svc:vpn-services/"+
+         "vpn-svc:vpn-service/vpn-svc:vpn-id";
        }
        mandatory true;
        description
@@ -2078,9 +1944,9 @@ identity urllc {
       }
       leaf site-role {
        type identityref {
-        base site-role;
+        base vpn-svc:site-role;
        }
-       default any-to-any-role;
+       default vpn-svc:any-to-any-role;
        description
        "Role of the site in the IP VPN.";
       }
@@ -2156,41 +2022,6 @@ identity urllc {
   description
   "Grouping for service parameters.";
  }
- grouping vpn-extranet {
-  container extranet-vpns {
-   if-feature extranet-vpn;
-   list extranet-vpn {
-    key vpn-id;
-    leaf vpn-id {
-     type svc-id;
-     description
-     "Identifies the target VPN the local VPN want to access.";
-    }
-    leaf local-sites-role {
-     type identityref {
-      base site-role;
-     }
-     default any-to-any-role;
-     description
-     "This describes the role of the
-     local sites in the target VPN topology.  In the any-to-any VPN
-     service topology, the local sites must have the same role, which
-     will be 'any-to-any-role'.  In the Hub-and-Spoke VPN service
-     topology or the Hub-and-Spoke disjoint VPN service topology,
-     the local sites must have a Hub role or a Spoke role.";
-    }
-    description
-    "List of extranet VPNs or target VPNs the local VPN is
-    attached to.";
-   }
-   description
-   "Container for extranet VPN configuration.";
-  }
-  description
-  "Grouping for extranet VPN configuration.
-  This provides an easy way to interconnect
-  all sites from two VPNs.";
- }
  grouping access-vpn-policy {
   container vpn-attachment {
    choice attachment-flavor {
@@ -2210,8 +2041,8 @@ identity urllc {
     case vpn-id {
      leaf vpn-id {
       type leafref {
-       path "/l3vpn-svc/vpn-services"+
-        "/vpn-service/vpn-id";
+       path "/svc:svc/vpn-svc:vpn-services"+
+        "/vpn-svc:vpn-service/vpn-svc:vpn-id";
       }
       description
       "Reference to an IP VPN.  Referencing a vpn-id provides
@@ -2220,9 +2051,9 @@ identity urllc {
      }
      leaf site-role {
       type identityref {
-       base site-role;
+       base vpn-svc:site-role;
       }
-      default any-to-any-role;
+      default vpn-svc:any-to-any-role;
       description
       "Role of the site in the IP VPN.  When referencing a vpn-id,
       the site-role setting must be added to express the role of
@@ -2241,92 +2072,6 @@ identity urllc {
   description
   "Defines the VPN attachment rules for
   a site's logical access.";
- }
- grouping vpn-profile-cfg {
-  container valid-provider-identifiers {
-   list cloud-identifier {
-    if-feature cloud-access;
-    key id;
-    leaf id {
-     type string;
-     description
-     "Identification of cloud service.
-     Local administration meaning.";
-    }
-    description
-    "List for Cloud Identifiers.";
-   }
-   list encryption-profile-identifier {
-    key id;
-    leaf id {
-     type string;
-     description
-     "Identification of the SP encryption profile
-     to be used.  Local administration meaning.";
-    }
-    description
-    "List for encryption profile identifiers.";
-   }
-   list qos-profile-identifier {
-    key id;
-    leaf id {
-     type string;
-     description
-     "Identification of the QoS Profile to be used.
-     Local administration meaning.";
-    }
-    description
-    "List for QoS Profile Identifiers.";
-   }
-   list bfd-profile-identifier {
-    key id;
-    leaf id {
-     type string;
-     description
-     "Identification of the SP BFD Profile to be used.
-     Local administration meaning.";
-    }
-    description
-    "List for BFD Profile identifiers.";
-   }
-     nacm:default-deny-write;
-     description
-     "Container for Valid Provider Identifies.";
-  }
-   description
-   "Grouping for VPN Profile configuration.";
- }
- grouping vpn-svc-cfg {
-  leaf vpn-id {
-   type svc-id;
-   description
-   "VPN identifier.  Local administration meaning.";
-  }
-  leaf customer-name {
-   type string;
-   description
-   "Name of the customer that actually uses the VPN service.
-   In the case that any intermediary (e.g., Tier-2 provider
-   or partner) sells the VPN service to their end user
-   on behalf of the original service provider (e.g., Tier-1
-   provider), the original service provider may require the
-   customer name to provide smooth activation/commissioning
-   and operation for the service.";
-  }
-  leaf vpn-service-topology {
-   type identityref {
-    base vpn-topology;
-   }
-   default any-to-any;
-   description
-   "VPN service topology.";
-  }
-  uses vpn-service-cloud-access;
-  uses vpn-service-multicast;
-  uses vpn-service-mpls;
-  uses vpn-extranet;
-  description
-  "Grouping for VPN service configuration.";
  }
  grouping site-top-level-cfg {
   uses site-vpn-policy;
@@ -2349,24 +2094,38 @@ identity urllc {
   "Grouping for site network access top-level configuration.";
  }
  /* Main blocks */
- container l3vpn-svc {
-  container vpn-profiles {
-   uses vpn-profile-cfg;
+ augment "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service" {
+  uses vpn-service-multicast;
+  description
+  "Augmentation for VPN service configuration.";
+ }
+ augment "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service/vpn-svc:cloud-accesses/vpn-svc:cloud-access" {
+  container address-translation {
+   container nat44 {
+    leaf enabled {
+     type boolean;
+      default false;
+      description
+      "Controls whether or not Network address
+      translation from IPv4 to IPv4 (NAT44)
+      [RFC3022] is required.";
+    }
+    leaf nat44-customer-address {
+     type inet:ipv4-address;
+      description
+      "Address to be used for network address
+      translation from IPv4 to IPv4.  This is
+      to be used if the customer is providing
+      the IPv4 address.  If the customer address
+      is not set, the model assumes that the
+      provider will allocate the address.";
+    }
     description
-    "Container for VPN Profiles.";
-  }
-  container vpn-services {
-   list vpn-service {
-    key vpn-id;
-    uses vpn-svc-cfg;
-    description
-    "List of VPN services.";
+    "IPv4-to-IPv4 translation.";
    }
    description
-   "Top-level container for the VPN services.";
+   "Container for NAT.";
   }
-  description
-  "Main container for L3VPN service configuration.";
  }
  augment "/svc:svc/svc:sites/svc:site" {
   uses site-top-level-cfg;

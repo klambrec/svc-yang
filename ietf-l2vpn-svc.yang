@@ -12,8 +12,8 @@ module ietf-l2vpn-svc {
   import ietf-svc {
     prefix svc;
   }
-  import ietf-netconf-acm {
-    prefix nacm;
+  import ietf-vpn-svc {
+    prefix vpn-svc;
   }
 
   organization
@@ -50,19 +50,9 @@ module ietf-l2vpn-svc {
        Network (L2VPN) Service Delivery";
   }
 
-  feature carrierscarrier {
-    description
-      "Enables the support of carriers' carriers (CsC).";
-  }
-
   feature ethernet-oam {
     description
       "Enables the support of Ethernet Service OAM.";
-  }
-
-  feature extranet-vpn {
-    description
-      "Enables the support of extranet VPNs.";
   }
 
   feature l2cp-control {
@@ -439,52 +429,27 @@ module ietf-l2vpn-svc {
       "Bandwidth is per VPN service.";
   }
 
-  identity site-vpn-flavor {
+  identity l2vpn {
+    base vpn-svc:service-type;
     description
-      "Base identity for the site VPN service flavor.";
-  }
-
-  identity site-vpn-flavor-single {
-    base site-vpn-flavor;
-    description
-      "Identity for the site VPN service flavor.
-       Used when the site belongs to only one VPN.";
-  }
-
-  identity site-vpn-flavor-multi {
-    base site-vpn-flavor;
-    description
-      "Identity for the site VPN service flavor.
-       Used when a logical connection of a site
-       belongs to multiple VPNs.";
-  }
-  identity site-vpn-flavor-nni {
-    base site-vpn-flavor;
-    description
-      "Identity for the site VPN service flavor.
-       Used to describe an NNI option A connection.";
-  }
-
-  identity service-type {
-    description
-      "Base identity of the service type.";
+      "Layer 2 VPN (L2VPN) service type.";
   }
 
   identity vpws {
-    base service-type;
+    base l2vpn;
     description
       "Point-to-point Virtual Private Wire Service (VPWS)
        service type.";
   }
 
   identity pwe3 {
-    base service-type;
+    base l2vpn;
     description
       "Pseudowire Emulation Edge to Edge (PWE3) service type.";
   }
 
   identity ldp-l2tp-vpls {
-    base service-type;
+    base l2vpn;
     description
       "LDP-based or L2TP-based multipoint Virtual Private LAN
        Service (VPLS) service type.  This VPLS uses LDP-signaled
@@ -492,21 +457,21 @@ module ietf-l2vpn-svc {
   }
 
   identity bgp-vpls {
-    base service-type;
+    base l2vpn;
     description
       "BGP-based multipoint VPLS service type.  This VPLS uses a
        BGP control plane as described in RFCs 4761 and 6624.";
   }
 
   identity vpws-evpn {
-    base service-type;
+    base l2vpn;
     description
       "VPWS service type using Ethernet VPNs (EVPNs)
        as specified in RFC 7432.";
   }
 
   identity pbb-evpn {
-    base service-type;
+    base l2vpn;
     description
       "Provider Backbone Bridge (PBB) service type using
        EVPNs as specified in RFC 7432.";
@@ -757,54 +722,7 @@ module ietf-l2vpn-svc {
     description
       "Identity for an IPv6 address family.";
   }
-
-  identity vpn-topology {
-    description
-      "Base identity for the VPN topology.";
-  }
-
-  identity any-to-any {
-    base vpn-topology;
-    description
-      "Identity for the any-to-any VPN topology.";
-  }
-
-  identity hub-spoke {
-    base vpn-topology;
-    description
-      "Identity for the Hub-and-Spoke VPN topology.";
-  }
-
-  identity hub-spoke-disjoint {
-    base vpn-topology;
-    description
-      "Identity for the Hub-and-Spoke VPN topology,
-       where Hubs cannot communicate with each other.";
-  }
-
-  identity site-role {
-    description
-      "Base identity for a site type.";
-  }
-
-  identity any-to-any-role {
-    base site-role;
-    description
-      "Site in an any-to-any L2VPN.";
-  }
-
-  identity spoke-role {
-    base site-role;
-    description
-      "Spoke site in a Hub-and-Spoke L2VPN.";
-  }
-
-  identity hub-role {
-    base site-role;
-    description
-      "Hub site in a Hub-and-Spoke L2VPN.";
-  }
-
+ 
   identity pm-type {
     description
       "Performance-monitoring type.";
@@ -1421,9 +1339,9 @@ module ietf-l2vpn-svc {
               "Standard QoS profile.";
             leaf profile {
               type leafref {
-                path "/l2vpn-svc/vpn-profiles/"
-                   + "valid-provider-identifiers/"
-                   + "qos-profile-identifier";
+                path "/svc:svc/vpn-svc:vpn-profiles/"
+                   + "vpn-svc:valid-provider-identifiers/"
+                   + "vpn-svc:qos-profile-identifier/vpn-svc:id";
               }
               description
                 "QoS profile to be used.";
@@ -1576,7 +1494,7 @@ module ietf-l2vpn-svc {
 
   grouping site-service-mpls {
     container carrierscarrier {
-      if-feature "carrierscarrier";
+      if-feature "vpn-svc:carrierscarrier";
       leaf signaling-type {
         type identityref {
           base carrierscarrier-type;
@@ -1592,370 +1510,193 @@ module ietf-l2vpn-svc {
       "Grouping for CsC.";
   }
 
-  container l2vpn-svc {
-    container vpn-profiles {
-      container valid-provider-identifiers {
-        leaf-list cloud-identifier {
-          if-feature "cloud-access";
-          type string;
-          description
-            "Identification of the public cloud service or
-             Internet service.  Local to each administration.";
+ augment "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers" {
+  list remote-carrier-identifier {
+   key id;
+   leaf id {
+    type string;
+    description
+      "Identification of the remote carrier name to be used.
+       It can be an L2VPN partner, data-center SP, or
+       private CSP.  Local to each administration.";
+   }
+   description
+   "List for Remote Carrier Identifiers.";
+  }
+ }
+ augment "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service" {
+  container frame-delivery {
+    if-feature "bum";
+    container customer-tree-flavors {
+      leaf-list tree-flavor {
+        type identityref {
+          base multicast-tree-type;
         }
-        leaf-list qos-profile-identifier {
-          type string;
-          description
-            "Identification of the QoS profile to be used.
-             Local to each administration.";
-        }
-        leaf-list bfd-profile-identifier {
-          type string;
-          description
-            "Identification of the SP BFD profile to be used.
-             Local to each administration.";
-        }
-        leaf-list remote-carrier-identifier {
-          type string;
-          description
-            "Identification of the remote carrier name to be used.
-             It can be an L2VPN partner, data-center SP, or
-             private CSP.  Local to each administration.";
-        }
-        nacm:default-deny-write;
         description
-          "Container for valid provider identifiers.";
+          "Type of tree to be used.";
       }
       description
-        "Container for VPN profiles.";
+        "Types of trees used by the customer.";
     }
-    container vpn-services {
-      list vpn-service {
-        key "vpn-id";
-        leaf vpn-id {
-          type svc-id;
-          description
-            "Defines a service identifier.";
-        }
-        leaf vpn-svc-type {
+    container bum-deliveries {
+      list bum-delivery {
+        key "frame-type";
+        leaf frame-type {
           type identityref {
-            base service-type;
+            base tf-type;
           }
-          default "vpws";
           description
-            "Service type.  By default, the service type is 'vpws'.";
+            "Type of frame delivery.  It supports unicast
+             frame delivery, multicast frame delivery,
+             and broadcast frame delivery.";
         }
-        leaf customer-name {
-          type string;
-          description
-            "Customer name.";
-        }
-        leaf svc-topo {
+        leaf delivery-mode {
           type identityref {
-            base vpn-topology;
+            base frame-delivery-mode;
           }
-          default "any-to-any";
+          default "unconditional";
           description
-            "Defines the service topology, e.g.,
-             'any-to-any', 'hub-spoke'.";
-        }
-        container cloud-accesses {
-          if-feature "cloud-access";
-          list cloud-access {
-            key "cloud-identifier";
-            leaf cloud-identifier {
-              type leafref {
-                path "/l2vpn-svc/vpn-profiles/"
-                   + "valid-provider-identifiers"
-                   + "/cloud-identifier";
-              }
-              description
-                "Identification of the cloud service.
-                 Local to each administration.";
-            }
-            choice list-flavor {
-              case permit-any {
-                leaf permit-any {
-                  type empty;
-                  description
-                    "Allow all sites.";
-                }
-              }
-              case deny-any-except {
-                leaf-list permit-site {
-                  type leafref {
-                    path "/svc:svc/svc:sites/svc:site/svc:site-id";
-                  }
-                  description
-                    "Site ID to be authorized.";
-                }
-              }
-              case permit-any-except {
-                leaf-list deny-site {
-                  type leafref {
-                    path "/svc:svc/svc:sites/svc:site/svc:site-id";
-                  }
-                  description
-                    "Site ID to be denied.";
-                }
-              }
-              description
-                "Choice for cloud access policy.
-                 By default, all sites in the L2VPN
-                 MUST be authorized to access the cloud.";
-            }
-            description
-              "Cloud access configuration.";
-          }
-          description
-            "Container for cloud access configurations.";
-        }
-        container frame-delivery {
-          if-feature "bum";
-          container customer-tree-flavors {
-            leaf-list tree-flavor {
-              type identityref {
-                base multicast-tree-type;
-              }
-              description
-                "Type of tree to be used.";
-            }
-            description
-              "Types of trees used by the customer.";
-          }
-          container bum-deliveries {
-            list bum-delivery {
-              key "frame-type";
-              leaf frame-type {
-                type identityref {
-                  base tf-type;
-                }
-                description
-                  "Type of frame delivery.  It supports unicast
-                   frame delivery, multicast frame delivery,
-                   and broadcast frame delivery.";
-              }
-              leaf delivery-mode {
-                type identityref {
-                  base frame-delivery-mode;
-                }
-                default "unconditional";
-                description
-                  "Defines the frame delivery mode
-                   ('unconditional' (default), 'conditional',
-                   or 'discard').  By default, service frames are
-                   unconditionally delivered to the destination site.";
-              }
-              description
-                "List of frame delivery types and modes.";
-            }
-            description
-              "Defines the frame delivery types and modes.";
-          }
-          leaf multicast-gp-port-mapping {
-            type identityref {
-              base multicast-gp-address-mapping;
-            }
-            mandatory true;
-            description
-              "Describes the way in which each interface is
-               associated with the multicast group.";
-          }
-          description
-            "Multicast global parameters for the VPN service.";
-        }
-        container extranet-vpns {
-          if-feature "extranet-vpn";
-          list extranet-vpn {
-            key "vpn-id";
-            leaf vpn-id {
-              type svc-id;
-              description
-                "Identifies the target VPN that the local VPN wants to
-                 access.";
-            }
-            leaf local-sites-role {
-              type identityref {
-                base site-role;
-              }
-              default "any-to-any-role";
-              description
-                "Describes the role of the local sites in the target
-                 VPN topology.  In the any-to-any VPN service topology,
-                 the local sites must have the same role, which will be
-                 'any-to-any-role'.  In the Hub-and-Spoke VPN service
-                 topology or the Hub-and-Spoke-Disjoint VPN service
-                 topology, the local sites must have a Hub role or a
-                 Spoke role.";
-            }
-            description
-              "List of extranet VPNs to which the local VPN
-               is attached.";
-          }
-          description
-            "Container for extranet VPN configurations.";
-        }
-        leaf ce-vlan-preservation {
-          type boolean;
-          mandatory true;
-          description
-            "Preserves the CE-VLAN ID from ingress to egress, i.e.,
-             the CE-VLAN tag of the egress frame is identical to
-             that of the ingress frame that yielded this
-             egress service frame.  If all-to-one bundling within
-             a site is enabled, then preservation applies to all
-             ingress service frames.  If all-to-one bundling is
-             disabled, then preservation applies to tagged
-             ingress service frames having CE-VLAN IDs 1 through 4094.";
-        }
-        leaf ce-vlan-cos-preservation {
-          type boolean;
-          mandatory true;
-          description
-            "CE VLAN CoS preservation.  The PCP bits in the CE-VLAN tag
-             of the egress frame are identical to those of the
-             ingress frame that yielded this egress service frame.";
-        }
-        leaf carrierscarrier {
-          if-feature "carrierscarrier";
-          type boolean;
-          default "false";
-          description
-            "The VPN is using CsC, and so MPLS is required.";
+            "Defines the frame delivery mode
+             ('unconditional' (default), 'conditional',
+             or 'discard').  By default, service frames are
+             unconditionally delivered to the destination site.";
         }
         description
-          "List of VPN services.";
+          "List of frame delivery types and modes.";
       }
       description
-        "Container for VPN services.";
+        "Defines the frame delivery types and modes.";
+    }
+    leaf multicast-gp-port-mapping {
+      type identityref {
+        base multicast-gp-address-mapping;
+      }
+      description
+        "Describes the way in which each interface is
+         associated with the multicast group.";
     }
     description
-      "Container for L2VPN services.";
+      "Multicast global parameters for the VPN service.";
   }
-
+ }
  augment "/svc:svc/svc:sites/svc:site" {
-        leaf site-vpn-flavor {
-          type identityref {
-            base site-vpn-flavor;
-          }
-          default "site-vpn-flavor-single";
+  leaf site-vpn-flavor {
+    type identityref {
+      base vpn-svc:site-vpn-flavor;
+    }
+    default "vpn-svc:site-vpn-flavor-single";
+    description
+      "Defines the way that the VPN multiplexing is
+        done, e.g., whether the site belongs to
+        a single VPN site or a multi-VPN site.  By
+        default, the site belongs to a single VPN.";
+  }
+  container vpn-policies {
+    list vpn-policy {
+      key "vpn-policy-id";
+      leaf vpn-policy-id {
+        type string;
+        description
+          "Unique identifier for the VPN policy.";
+      }
+      list entries {
+        key "id";
+        leaf id {
+          type string;
           description
-            "Defines the way that the VPN multiplexing is
-             done, e.g., whether the site belongs to
-             a single VPN site or a multi-VPN site.  By
-             default, the site belongs to a single VPN.";
+            "Unique identifier for the policy entry.";
         }
-        container vpn-policies {
-          list vpn-policy {
-            key "vpn-policy-id";
-            leaf vpn-policy-id {
-              type string;
+        container filters {
+          list filter {
+            key "type";
+            ordered-by user;
+            leaf type {
+              type identityref {
+                base vpn-policy-filter-type;
+              }
               description
-                "Unique identifier for the VPN policy.";
+                "Type of VPN policy filter.";
             }
-            list entries {
-              key "id";
-              leaf id {
-                type string;
+            leaf-list lan-tag {
+              when "derived-from-or-self(../type, "
+                  + "'l2vpn-svc:lan')" {
                 description
-                  "Unique identifier for the policy entry.";
+                  "Only applies when the VPN policy filter is a
+                    LAN tag filter.";
               }
-              container filters {
-                list filter {
-                  key "type";
-                  ordered-by user;
-                  leaf type {
-                    type identityref {
-                      base vpn-policy-filter-type;
-                    }
-                    description
-                      "Type of VPN policy filter.";
-                  }
-                  leaf-list lan-tag {
-                    when "derived-from-or-self(../type, "
-                       + "'l2vpn-svc:lan')" {
-                      description
-                        "Only applies when the VPN policy filter is a
-                         LAN tag filter.";
-                    }
-                    if-feature "lan-tag";
-                    type uint32;
-                    description
-                      "List of Ethernet LAN tags to be matched.  An
-                       Ethernet LAN tag identifies a particular
-                       broadcast domain in a VPN.";
-                  }
-                  description
-                    "List of filters used on the site.  This list can
-                     be augmented.";
-                }
-                description
-                  "If a more granular VPN attachment is necessary,
-                   filtering can be used.  If used, it permits the
-                   splitting of site LANs among multiple VPNs.  The
-                   site LAN can be split based on either the LAN tag or
-                   the LAN prefix.  If no filter is used, all the LANs
-                   will be part of the same VPNs with the same role.";
-              }
-              list vpn {
-                key "vpn-id";
-                leaf vpn-id {
-                  type leafref {
-                    path "/l2vpn-svc/vpn-services/vpn-service/vpn-id";
-                  }
-                  description
-                    "Reference to an L2VPN.";
-                }
-                leaf site-role {
-                  type identityref {
-                    base site-role;
-                  }
-                  default "any-to-any-role";
-                  description
-                    "Role of the site in the L2VPN.";
-                }
-                description
-                  "List of VPNs with which the LAN is associated.";
-              }
+              if-feature "lan-tag";
+              type uint32;
               description
-                "List of entries for an export policy.";
+                "List of Ethernet LAN tags to be matched.  An
+                  Ethernet LAN tag identifies a particular
+                  broadcast domain in a VPN.";
             }
             description
-              "List of VPN policies.";
+              "List of filters used on the site.  This list can
+                be augmented.";
           }
           description
-            "VPN policy.";
+            "If a more granular VPN attachment is necessary,
+              filtering can be used.  If used, it permits the
+              splitting of site LANs among multiple VPNs.  The
+              site LAN can be split based on either the LAN tag or
+              the LAN prefix.  If no filter is used, all the LANs
+              will be part of the same VPNs with the same role.";
         }
-        container service {
-          uses site-service-qos-profile;
-          uses site-service-mpls;
-          description
-            "Service parameters on the attachment.";
-        }
-        uses site-bum;
-        uses site-mac-loop-prevention;
-        uses site-acl;
-        leaf bundling-type {
-          type identityref {
-            base bundling-type;
+        list vpn {
+          key "vpn-id";
+          leaf vpn-id {
+            type leafref {
+              path "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service/vpn-svc:vpn-id";
+            }
+            description
+              "Reference to an L2VPN.";
           }
-          default "one2one-bundling";
+          leaf site-role {
+            type identityref {
+              base vpn-svc:site-role;
+            }
+            default "vpn-svc:any-to-any-role";
+            description
+              "Role of the site in the L2VPN.";
+          }
           description
-            "Bundling type.  By default, each L2VPN
-             can be associated with only one
-             CE-VLAN, i.e., one-to-one bundling is used.";
+            "List of VPNs with which the LAN is associated.";
         }
-        leaf default-ce-vlan-id {
-          type uint32;
-          description
-            "Default CE VLAN ID set at the site level.";
-        }
+        description
+          "List of entries for an export policy.";
+      }
+      description
+        "List of VPN policies.";
     }
-
-
-
-
-
-
+    description
+      "VPN policy.";
+  }
+  container service {
+    uses site-service-qos-profile;
+    uses site-service-mpls;
+    description
+      "Service parameters on the attachment.";
+  }
+  uses site-bum;
+  uses site-mac-loop-prevention;
+  uses site-acl;
+  leaf bundling-type {
+    type identityref {
+      base bundling-type;
+    }
+    default "one2one-bundling";
+    description
+      "Bundling type.  By default, each L2VPN
+        can be associated with only one
+        CE-VLAN, i.e., one-to-one bundling is used.";
+  }
+  leaf default-ce-vlan-id {
+    type uint32;
+    description
+      "Default CE VLAN ID set at the site level.";
+  }
+ }
  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access" {
             leaf remote-carrier-name {
               when "derived-from-or-self(../../../site-vpn-flavor,"
@@ -1965,9 +1706,9 @@ module ietf-l2vpn-svc {
                    'site-vpn-flavor-nni'.";
               }
               type leafref {
-                path "/l2vpn-svc/vpn-profiles/"
-                   + "valid-provider-identifiers"
-                   + "/remote-carrier-identifier";
+                path "/svc:svc/vpn-svc:vpn-profiles/"
+                   + "vpn-svc:valid-provider-identifiers"
+                   + "/remote-carrier-identifier/id";
               }
               description
                 "Remote carrier name.  The 'remote-carrier-name'
@@ -2293,9 +2034,9 @@ module ietf-l2vpn-svc {
                         case profile {
                           leaf profile-name {
                             type leafref {
-                              path "/l2vpn-svc/vpn-profiles/"
-                                 + "valid-provider-identifiers"
-                                 + "/bfd-profile-identifier";
+                              path "/svc:svc/vpn-svc:vpn-profiles/"
+                                 + "vpn-svc:valid-provider-identifiers"
+                                 + "/vpn-svc:bfd-profile-identifier/vpn-svc:id";
                             }
                             description
                               "SP well-known profile.";
@@ -2390,7 +2131,7 @@ module ietf-l2vpn-svc {
                 key "svc-id";
                 leaf svc-id {
                   type leafref {
-                    path "/l2vpn-svc/vpn-services/vpn-service/vpn-id";
+                    path "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service/vpn-svc:vpn-id";
                   }
                   description
                     "VPN service identifier.";
@@ -2738,7 +2479,7 @@ module ietf-l2vpn-svc {
                 case vpn-id {
                   leaf vpn-id {
                     type leafref {
-                      path "/l2vpn-svc/vpn-services/vpn-service/vpn-id";
+                      path "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service/vpn-svc:vpn-id";
                     }
                     description
                       "Reference to an L2VPN.  Referencing a vpn-id
@@ -2748,9 +2489,9 @@ module ietf-l2vpn-svc {
                   }
                   leaf site-role {
                     type identityref {
-                      base site-role;
+                      base vpn-svc:site-role;
                     }
-                    default "any-to-any-role";
+                    default "vpn-svc:any-to-any-role";
                     description
                       "Role of the site in the L2VPN.  When referencing
                        a vpn-id, the site-role setting must be added to
