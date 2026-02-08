@@ -714,36 +714,6 @@ module ietf-l3vpn-svc {
       "Flow definition based on criteria.";
   }
 
-  grouping site-service-basic {
-    leaf svc-input-bandwidth {
-      type uint64;
-      units "bps";
-      description
-        "From the customer site's perspective, the service
-         input bandwidth of the connection or download
-         bandwidth from the SP to the site.";
-    }
-    leaf svc-output-bandwidth {
-      type uint64;
-      units "bps";
-      description
-        "From the customer site's perspective, the service
-         output bandwidth of the connection or upload
-         bandwidth from the site to the SP.";
-    }
-    leaf svc-mtu {
-      type uint16;
-      units "bytes";
-      description
-        "MTU at service level.  If the service is IP,
-         it refers to the IP MTU.  If CsC is enabled,
-         the requested 'svc-mtu' leaf will refer to the
-         MPLS MTU and not to the IP MTU.";
-    }
-    description
-      "Defines basic service parameters for a site.";
-  }
-
   grouping site-protection {
     container traffic-protection {
       if-feature "fast-reroute";
@@ -1606,29 +1576,6 @@ module ietf-l3vpn-svc {
       "Grouping for security parameters.";
   }
 
-  grouping site-service {
-    container service {
-      uses site-service-mpls;
-      uses site-service-multicast;
-      description
-        "Service parameters on the attachment.";
-    }
-    description
-      "Grouping for service parameters.";
-  }
-
-  grouping site-network-access-service {
-    container service {
-      uses site-service-basic;
-      uses site-service-mpls;
-      uses site-service-multicast;
-      description
-        "Service parameters on the attachment.";
-    }
-    description
-      "Grouping for service parameters.";
-  }
-
   grouping access-vpn-policy {
     container vpn-attachment {
       choice attachment-flavor {
@@ -1684,7 +1631,6 @@ module ietf-l3vpn-svc {
   grouping site-top-level-cfg {
     uses site-maximum-routes;
     uses site-security;
-    uses site-service;
     uses site-protection;
     uses site-routing;
     description
@@ -1694,7 +1640,6 @@ module ietf-l3vpn-svc {
   grouping site-network-access-top-level-cfg {
     uses site-attachment-ip-connection;
     uses site-security;
-    uses site-network-access-service;
     uses site-routing;
     uses access-vpn-policy;
     description
@@ -1769,13 +1714,25 @@ module ietf-l3vpn-svc {
         be augmented.";
   }
 
-  // TODO: augment in where site-service-qos-profile is used
-  // augment "/svc:svc/svc:sites/svc:site/vpn-svc:vpn-policies/vpn-svc:vpn-policy/vpn-svc:entries/vpn-svc:filters/vpn-svc:filter" {
-  //   uses flow-definition;
-  // }
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service" {
+      uses site-service-multicast;
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
+      uses flow-definition;
+  }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
         + "/svc:site-network-access" {
     uses site-network-access-top-level-cfg;
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
+        + "/svc:site-network-access/vpn-svc:service" {
+    uses site-service-multicast;
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
+      uses flow-definition;
   }
 }

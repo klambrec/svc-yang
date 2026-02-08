@@ -60,11 +60,6 @@ module ietf-l2vpn-svc {
       "Enables the support of L2CP control.";
   }
 
-  feature input-bw {
-    description
-      "Enables the support of input bandwidth in a VPN.";
-  }
-
   feature output-bw {
     description
       "Enables the support of output bandwidth in a VPN.";
@@ -386,36 +381,6 @@ module ietf-l2vpn-svc {
       "Identity of the LAG interface type.";
   }
 
-  identity bw-type {
-    description
-      "Identity of the bandwidth type.";
-  }
-
-  identity bw-per-cos {
-    base bw-type;
-    description
-      "Bandwidth is per CoS.";
-  }
-
-  identity bw-per-port {
-    base bw-type;
-    description
-      "Bandwidth is per site network access.";
-  }
-
-  identity bw-per-site {
-    base bw-type;
-    description
-      "Bandwidth is per site.  It is applicable to
-       all the site network accesses within the site.";
-  }
-
-  identity bw-per-svc {
-    base bw-type;
-    description
-      "Bandwidth is per VPN service.";
-  }
-
   identity l2vpn {
     base vpn-svc:service-type;
     description
@@ -612,23 +577,6 @@ module ietf-l2vpn-svc {
     base lacp-speed;
     description
       "Identity of LACP slow.";
-  }
-
-  identity bw-direction {
-    description
-      "Identity for the bandwidth direction.";
-  }
-
-  identity input-bw {
-    base bw-direction;
-    description
-      "Identity for the input bandwidth.";
-  }
-
-  identity output-bw {
-    base bw-direction;
-    description
-      "Identity for the output bandwidth.";
   }
 
   identity management {
@@ -867,6 +815,21 @@ module ietf-l2vpn-svc {
       "Identity for VXLAN access by BGP EVPN learning.";
   }
 
+  grouping flow-definition {
+    leaf src-mac {
+      type yang:mac-address;
+      description
+        "Source MAC.";
+    }
+    leaf dst-mac {
+      type yang:mac-address;
+      description
+        "Destination MAC.";
+    }
+    description
+      "Flow definition based on criteria.";
+  }
+
   grouping site-acl {
     container access-control-list {
       if-feature "acl";
@@ -1098,11 +1061,6 @@ module ietf-l2vpn-svc {
   }
 
   augment "/svc:svc/svc:sites/svc:site" {
-    container service {
-      uses site-service-mpls;
-      description
-        "Service parameters on the attachment.";
-    }
     uses site-bum;
     uses site-mac-loop-prevention;
     uses site-acl;
@@ -1123,19 +1081,9 @@ module ietf-l2vpn-svc {
     }
   }
 
-  // TODO: augment in where site-service-qos-profile is used, site & SNA
-  // augment "/svc:svc/svc:sites/svc:site/vpn-svc:vpn-policies/vpn-svc:vpn-policy/vpn-svc:entries/vpn-svc:filters/vpn-svc:filter" {
-  //               leaf src-mac {
-  //                 type yang:mac-address;
-  //                 description
-  //                   "Source MAC.";
-  //               }
-  //               leaf dst-mac {
-  //                 type yang:mac-address;
-  //                 description
-  //                   "Destination MAC.";
-  //               }
-  // }
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
+      uses flow-definition;
+  }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
         + "/svc:site-network-access" {
@@ -1960,136 +1908,6 @@ module ietf-l2vpn-svc {
       description
         "Defines the VPN attachment of a site.";
     }
-    container service {
-      container svc-bandwidth {
-        if-feature "input-bw";
-        list bandwidth {
-          key "direction type";
-          leaf direction {
-            type identityref {
-              base bw-direction;
-            }
-            description
-              "Indicates the bandwidth direction.  It can be
-               the bandwidth download direction from the SP to
-               the site or the bandwidth upload direction from
-               the site to the SP.";
-          }
-          leaf type {
-            type identityref {
-              base bw-type;
-            }
-            description
-              "Bandwidth type.  By default, the bandwidth type
-               is set to 'bw-per-cos'.";
-          }
-          leaf cos-id {
-            when "derived-from-or-self(../type, "
-               + "'l2vpn-svc:bw-per-cos')" {
-              description
-                "Relevant when the bandwidth type is set to
-                 'bw-per-cos'.";
-            }
-            type uint8;
-            description
-              "Identifier of the CoS, indicated by DSCP or a
-               CE-VLAN CoS (802.1p) value in the service frame.
-               If the bandwidth type is set to 'bw-per-cos',
-               the CoS ID MUST also be specified.";
-          }
-          leaf vpn-id {
-            when "derived-from-or-self(../type, "
-               + "'l2vpn-svc:bw-per-svc')" {
-              description
-                "Relevant when the bandwidth type is
-                 set as bandwidth per VPN service.";
-            }
-            type vpn-svc:svc-id;
-            description
-              "Identifies the target VPN.  If the bandwidth
-               type is set as bandwidth per VPN service, the
-               vpn-id MUST be specified.";
-          }
-          leaf cir {
-            type uint64;
-            units "bps";
-            mandatory true;
-            description
-              "Committed Information Rate.  The maximum number
-               of bits that a port can receive or send over
-               an interface in one second.";
-          }
-          leaf cbs {
-            type uint64;
-            units "bps";
-            mandatory true;
-            description
-              "Committed Burst Size (CBS).  Controls the bursty
-               nature of the traffic.  Traffic that does not
-               use the configured Committed Information Rate
-               (CIR) accumulates credits until the credits
-               reach the configured CBS.";
-          }
-          leaf eir {
-            type uint64;
-            units "bps";
-            description
-              "Excess Information Rate (EIR), i.e., excess frame
-               delivery allowed that is not subject to an SLA.
-               The traffic rate can be limited by the EIR.";
-          }
-          leaf ebs {
-            type uint64;
-            units "bps";
-            description
-              "Excess Burst Size (EBS).  The bandwidth available
-               for burst traffic from the EBS is subject to the
-               amount of bandwidth that is accumulated during
-               periods when traffic allocated by the EIR
-               policy is not used.";
-          }
-          leaf pir {
-            type uint64;
-            units "bps";
-            description
-              "Peak Information Rate, i.e., maximum frame
-               delivery allowed.  It is equal to or less
-               than the sum of the CIR and the EIR.";
-          }
-          leaf pbs {
-            type uint64;
-            units "bps";
-            description
-              "Peak Burst Size.  It is measured in bytes per
-               second.";
-          }
-          description
-            "List of bandwidth values (e.g., per CoS,
-             per vpn-id).";
-        }
-        description
-          "From the customer site's perspective, the service
-           input/output bandwidth of the connection or
-           download/upload bandwidth from the SP/site
-           to the site/SP.";
-      }
-      leaf svc-mtu {
-        type uint16;
-        units "bytes";
-        description
-          "SVC MTU.  It is also known as the maximum
-           transmission unit or maximum frame size.  When
-           a frame is larger than the MTU, it is broken
-           down, or fragmented, into smaller pieces by
-           the network protocol to accommodate the MTU
-           of the network.  If CsC is enabled,
-           the requested svc-mtu leaf will refer to the
-           MPLS MTU and not to the link MTU.";
-      }
-      uses site-service-mpls;
-      description
-        "Container for services.";
-    }
     uses site-bum;
     uses site-mac-loop-prevention;
     uses site-acl;
@@ -2126,5 +1944,9 @@ module ietf-l2vpn-svc {
       description
         "Container of MAC address limit configurations.";
     }
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
+      uses flow-definition;
   }
 }
