@@ -55,11 +55,6 @@ module ietf-l3vpn-svc {
       "RFC 8049.";
   }
 
-  feature cloud-access {
-    description
-      "Allows the VPN to connect to a CSP.";
-  }
-
   feature multicast {
     description
       "Enables multicast capabilities in a VPN.";
@@ -75,11 +70,6 @@ module ietf-l3vpn-svc {
       "Enables IPv6 support in a VPN.";
   }
 
-  feature carrierscarrier {
-    description
-      "Enables support of CsC.";
-  }
-
   feature extranet-vpn {
     description
       "Enables support of extranet VPNs.";
@@ -88,16 +78,6 @@ module ietf-l3vpn-svc {
   feature encryption {
     description
       "Enables support of encryption.";
-  }
-
-  feature qos {
-    description
-      "Enables support of classes of services.";
-  }
-
-  feature qos-custom {
-    description
-      "Enables support of the custom QoS profile.";
   }
 
   feature rtg-bgp {
@@ -135,59 +115,10 @@ module ietf-l3vpn-svc {
       "Enables support of BFD.";
   }
 
-  feature target-sites {
-    description
-      "Enables support of the 'target-sites' match flow parameter.";
-  }
-
-  typedef svc-id {
-    type string;
-    description
-      "Defines a type of service component identifier.";
-  }
-
   typedef template-id {
     type string;
     description
       "Defines a type of service template identifier.";
-  }
-
-  typedef address-family {
-    type enumeration {
-      enum ipv4 {
-        description
-          "IPv4 address family.";
-      }
-      enum ipv6 {
-        description
-          "IPv6 address family.";
-      }
-    }
-    description
-      "Defines a type for the address family.";
-  }
-
-  identity site-network-access-type {
-    description
-      "Base identity for site-network-access type.";
-  }
-
-  identity point-to-point {
-    base site-network-access-type;
-    description
-      "Identity for point-to-point connection.";
-  }
-
-  identity multipoint {
-    base site-network-access-type;
-    description
-      "Identity for multipoint connection.
-       Example: Ethernet broadcast segment.";
-  }
-
-  identity placement-diversity {
-    description
-      "Base identity for site placement constraints.";
   }
 
   identity site-vpn-flavor-sub {
@@ -196,29 +127,6 @@ module ietf-l3vpn-svc {
       "Base identity for the site VPN service flavor.
        Used when a site has multiple logical connections.
        Each connection may belong to different multiple VPNs.";
-  }
-
-  identity management {
-    description
-      "Base identity for site management scheme.";
-  }
-
-  identity co-managed {
-    base management;
-    description
-      "Base identity for co-managed site.";
-  }
-
-  identity customer-managed {
-    base management;
-    description
-      "Base identity for customer-managed site.";
-  }
-
-  identity provider-managed {
-    base management;
-    description
-      "Base identity for provider-managed site.";
   }
 
   identity address-allocation-type {
@@ -255,29 +163,6 @@ module ietf-l3vpn-svc {
     base address-allocation-type;
     description
       "Use IPv6 SLAAC.";
-  }
-
-  identity site-role {
-    description
-      "Base identity for site type.";
-  }
-
-  identity any-to-any-role {
-    base site-role;
-    description
-      "Site in an any-to-any IP VPN.";
-  }
-
-  identity spoke-role {
-    base site-role;
-    description
-      "Spoke site in a Hub-and-Spoke IP VPN.";
-  }
-
-  identity hub-role {
-    base site-role;
-    description
-      "Hub site in a Hub-and-Spoke IP VPN.";
   }
 
   identity multicast-tree-type {
@@ -730,39 +615,6 @@ module ietf-l3vpn-svc {
       "Defines protection service parameters for a site.";
   }
 
-  grouping site-service-mpls {
-    container carrierscarrier {
-      if-feature "carrierscarrier";
-      leaf signalling-type {
-        type enumeration {
-          enum ldp {
-            description
-              "Use LDP as the signalling protocol
-               between the PE and the CE.  In this case,
-               an IGP routing protocol must also be activated.";
-          }
-          enum bgp {
-            description
-              "Use BGP (as per RFC 8277) as the signalling protocol
-               between the PE and the CE.
-               In this case, BGP must also be configured as
-               the routing protocol.";
-          }
-        }
-        default "bgp";
-        description
-          "MPLS signalling type.";
-      }
-      description
-        "This container is used when the customer provides
-         MPLS-based services.  This is only used in the case
-         of CsC (i.e., a customer builds an MPLS service using
-         an IP VPN to carry its traffic).";
-    }
-    description
-      "Defines MPLS service parameters for a site.";
-  }
-
   grouping site-security-authentication {
     container authentication {
       description
@@ -865,7 +717,7 @@ module ietf-l3vpn-svc {
           }
           if-feature "rtg-ospf";
           leaf-list address-family {
-            type address-family;
+            type svc:address-family;
             min-elements 1;
             description
               "If OSPF is used on this site, this node
@@ -892,7 +744,7 @@ module ietf-l3vpn-svc {
             list sham-link {
               key "target-site";
               leaf target-site {
-                type svc-id;
+                type svc:svc-id;
                 description
                   "Target site for the sham link connection.
                    The site is referred to by its ID.";
@@ -929,7 +781,7 @@ module ietf-l3vpn-svc {
                requests BGP routing.";
           }
           leaf-list address-family {
-            type address-family;
+            type svc:address-family;
             min-elements 1;
             description
               "If BGP is used on this site, this node
@@ -1007,7 +859,7 @@ module ietf-l3vpn-svc {
           }
           if-feature "rtg-rip";
           leaf-list address-family {
-            type address-family;
+            type svc:address-family;
             min-elements 1;
             description
               "If RIP is used on this site, this node
@@ -1025,7 +877,7 @@ module ietf-l3vpn-svc {
           }
           if-feature "rtg-vrrp";
           leaf-list address-family {
-            type address-family;
+            type svc:address-family;
             min-elements 1;
             description
               "If VRRP is used on this site, this node
@@ -1545,7 +1397,7 @@ module ietf-l3vpn-svc {
       list address-family {
         key "af";
         leaf af {
-          type address-family;
+          type svc:address-family;
           description
             "Address family.";
         }

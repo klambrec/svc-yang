@@ -70,12 +70,6 @@ module ietf-l2vpn-svc {
       "Enables the support of a list of UNIs in a VPN.";
   }
 
-  feature cloud-access {
-    description
-      "Allows the VPN to connect to a Cloud Service Provider (CSP)
-       or an ISP.";
-  }
-
   feature oam-3ah {
     description
       "Enables the support of OAM 802.3ah.";
@@ -99,16 +93,6 @@ module ietf-l2vpn-svc {
   feature encryption {
     description
       "Enables the support of encryption.";
-  }
-
-  feature qos {
-    description
-      "Enables support for QoS.";
-  }
-
-  feature qos-custom {
-    description
-      "Enables the support of a custom QoS profile.";
   }
 
   feature lag-interface {
@@ -337,27 +321,6 @@ module ietf-l2vpn-svc {
       "Identity for the VLAN type.";
   }
 
-  identity carrierscarrier-type {
-    description
-      "Identity of the CsC type.";
-  }
-
-  identity ldp {
-    base carrierscarrier-type;
-    description
-      "Use LDP as the signaling protocol
-       between the PE and the CE.";
-  }
-
-  identity bgp {
-    base carrierscarrier-type;
-    description
-      "Use BGP (as per RFC 8277) as the signaling protocol
-       between the PE and the CE.
-       In this case, BGP must also be configured as
-       the routing protocol.";
-  }
-
   identity eth-inf-type {
     description
       "Identity of the Ethernet interface type.";
@@ -577,29 +540,6 @@ module ietf-l2vpn-svc {
     base lacp-speed;
     description
       "Identity of LACP slow.";
-  }
-
-  identity management {
-    description
-      "Base identity for the site management scheme.";
-  }
-
-  identity co-managed {
-    base management;
-    description
-      "Identity for a co-managed site.";
-  }
-
-  identity customer-managed {
-    base management;
-    description
-      "Identity for a customer-managed site.";
-  }
-
-  identity provider-managed {
-    base management;
-    description
-      "Identity for a provider-managed site.";
   }
 
   identity address-family {
@@ -968,24 +908,6 @@ module ietf-l2vpn-svc {
     }
     description
       "Grouping for MAC loop prevention.";
-  }
-
-  grouping site-service-mpls {
-    container carrierscarrier {
-      if-feature "vpn-svc:carrierscarrier";
-      leaf signaling-type {
-        type identityref {
-          base carrierscarrier-type;
-        }
-        default "bgp";
-        description
-          "CsC.  By default, the signaling type is 'bgp'.";
-      }
-      description
-        "Container for CsC.";
-    }
-    description
-      "Grouping for CsC.";
   }
 
   augment "/svc:svc/vpn-svc:vpn-profiles"

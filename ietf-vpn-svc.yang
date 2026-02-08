@@ -82,12 +82,6 @@ module ietf-vpn-svc {
       "Enables the support of input bandwidth in a VPN.";
   }
 
-  typedef svc-id {
-    type string;
-    description
-      "Defines the type of service component identifier.";
-  }
-
   identity service-type {
     description
       "Base identity of the service type.";
@@ -451,7 +445,7 @@ module ietf-vpn-svc {
                 }
                 leaf-list target-sites {
                   if-feature "target-sites";
-                  type svc-id;
+                  type svc:svc-id;
                   description
                     "Identifies a site as a traffic destination.";
                 }
@@ -461,7 +455,7 @@ module ietf-vpn-svc {
                     "Allow all.";
                 }
                 leaf vpn-id {
-                  type svc-id;
+                  type svc:svc-id;
                   description
                     "Reference to the target VPN.";
                 }
@@ -1069,7 +1063,7 @@ module ietf-vpn-svc {
                 "Relevant when the bandwidth type is
                  set as bandwidth per VPN service.";
             }
-            type vpn-svc:svc-id;
+            type svc:svc-id;
             description
               "Identifies the target VPN.  If the bandwidth
                type is set as bandwidth per VPN service, the

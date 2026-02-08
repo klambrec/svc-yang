@@ -167,29 +167,6 @@ module ietf-svc {
       "Base identity for provider-managed site.";
   }
 
-  identity site-role {
-    description
-      "Base identity for site type.";
-  }
-
-  identity any-to-any-role {
-    base site-role;
-    description
-      "Site in an any-to-any IP VPN.";
-  }
-
-  identity spoke-role {
-    base site-role;
-    description
-      "Spoke site in a Hub-and-Spoke IP VPN.";
-  }
-
-  identity hub-role {
-    base site-role;
-    description
-      "Hub site in a Hub-and-Spoke IP VPN.";
-  }
-
   grouping customer-location-info {
     container locations {
       list location {
@@ -612,7 +589,7 @@ module ietf-svc {
               "List of accesses for a site.";
           }
           description
-            "List of accesses for a site.";
+            "Container for accesses for a site.";
         }
         description
           "List of sites.";
