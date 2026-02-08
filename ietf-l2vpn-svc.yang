@@ -1547,17 +1547,7 @@ module ietf-l2vpn-svc {
   }
 
   augment "/svc:svc/svc:sites/svc:site" {
-    leaf site-vpn-flavor {
-      type identityref {
-        base vpn-svc:site-vpn-flavor;
-      }
-      default "vpn-svc:site-vpn-flavor-single";
-      description
-        "Defines the way that the VPN multiplexing is
-          done, e.g., whether the site belongs to
-          a single VPN site or a multi-VPN site.  By
-          default, the site belongs to a single VPN.";
-    }
+
     container vpn-policies {
       list vpn-policy {
         key "vpn-policy-id";
@@ -1669,8 +1659,8 @@ module ietf-l2vpn-svc {
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
         + "/svc:site-network-access" {
     leaf remote-carrier-name {
-      when "derived-from-or-self(../../../site-vpn-flavor,"
-         + "'l2vpn-svc:site-vpn-flavor-nni')" {
+      when "derived-from-or-self(../../../vpn-svc:site-vpn-flavor,"
+         + "'vpn-svc:site-vpn-flavor-nni')" {
         description
           "Relevant when the site's VPN flavor is
            'site-vpn-flavor-nni'.";

@@ -1914,23 +1914,6 @@ module ietf-l3vpn-svc {
       "Multicast parameters for the site.";
   }
 
-  grouping site-vpn-flavor {
-    leaf site-vpn-flavor {
-      type identityref {
-        base vpn-svc:site-vpn-flavor;
-      }
-      default "vpn-svc:site-vpn-flavor-single";
-      description
-        "Defines the way the VPN multiplexing is done, e.g., whether
-         the site belongs to a single VPN site or a multiVPN; or, in the case
-         of a multiVPN, whether the logical accesses of the sites belong
-         to the same set of VPNs or each logical access maps to
-         different VPNs.";
-    }
-    description
-      "Grouping for site VPN flavor.";
-  }
-
   grouping site-vpn-policy {
     container vpn-policies {
       list vpn-policy {
@@ -2154,7 +2137,6 @@ module ietf-l3vpn-svc {
 
   grouping site-top-level-cfg {
     uses site-vpn-policy;
-    uses site-vpn-flavor;
     uses site-maximum-routes;
     uses site-security;
     uses site-service;

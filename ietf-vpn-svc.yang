@@ -333,4 +333,19 @@ module ietf-vpn-svc {
         "Container for VPN Profiles.";
     }
   }
+  augment "/svc:svc/svc:sites/svc:site" {
+    leaf site-vpn-flavor {
+      type identityref {
+        base vpn-svc:site-vpn-flavor;
+      }
+      default "site-vpn-flavor-single";
+      description
+        "Defines the way that the VPN multiplexing is
+          done, e.g., whether the site belongs to
+          a single VPN site or a multi-VPN site.  By
+          default, the site belongs to a single VPN.";
+    }
+    description
+      "Augmentation for site-level.";
+  }
 }
