@@ -629,7 +629,7 @@ module ietf-l3vpn-svc {
     leaf l4-src-port {
       type inet:port-number;
       must 'current() < ../l4-src-port-range/lower-port or '
-          + 'current() > ../l4-src-port-range/upper-port' {
+         + 'current() > ../l4-src-port-range/upper-port' {
         description
           "If l4-src-port and l4-src-port-range/lower-port and
             upper-port are set at the same time, l4-src-port
@@ -665,7 +665,7 @@ module ietf-l3vpn-svc {
     leaf l4-dst-port {
       type inet:port-number;
       must 'current() < ../l4-dst-port-range/lower-port or '
-          + 'current() > ../l4-dst-port-range/upper-port' {
+         + 'current() > ../l4-dst-port-range/upper-port' {
         description
           "If l4-dst-port and l4-dst-port-range/lower-port
             and upper-port are set at the same time,
@@ -1633,7 +1633,9 @@ module ietf-l3vpn-svc {
     uses site-top-level-cfg;
   }
 
-  augment "/svc:svc/svc:sites/svc:site/vpn-svc:vpn-policies/vpn-svc:vpn-policy/vpn-svc:entries/vpn-svc:filters/vpn-svc:filter" {
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:vpn-policies"
+        + "/vpn-svc:vpn-policy/vpn-svc:entries/vpn-svc:filters"
+        + "/vpn-svc:filter" {
     leaf-list ipv4-lan-prefix {
       when
         "derived-from-or-self(../vpn-svc:type, 'l3vpn-svc:ipv4')" {
@@ -1662,11 +1664,14 @@ module ietf-l3vpn-svc {
   }
 
   augment "/svc:svc/svc:sites/svc:site/vpn-svc:service" {
-      uses site-service-multicast;
+    uses site-service-multicast;
   }
 
-  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
-      uses flow-definition;
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service"
+        + "/vpn-svc:qos/vpn-svc:qos-classification-policy"
+        + "/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow"
+        + "/vpn-svc:match-flow" {
+    uses flow-definition;
   }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
@@ -1679,7 +1684,11 @@ module ietf-l3vpn-svc {
     uses site-service-multicast;
   }
 
-  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
-      uses flow-definition;
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
+        + "/svc:site-network-access/vpn-svc:service/vpn-svc:qos"
+        + "/vpn-svc:qos-classification-policy/vpn-svc:rule"
+        + "/vpn-svc:match-type/vpn-svc:match-flow"
+        + "/vpn-svc:match-flow" {
+    uses flow-definition;
   }
 }

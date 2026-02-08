@@ -1081,8 +1081,11 @@ module ietf-l2vpn-svc {
     }
   }
 
-  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
-      uses flow-definition;
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service"
+        + "/vpn-svc:qos/vpn-svc:qos-classification-policy"
+        + "/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow"
+        + "/vpn-svc:match-flow" {
+    uses flow-definition;
   }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
@@ -1903,7 +1906,11 @@ module ietf-l2vpn-svc {
     }
   }
 
-  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access/vpn-svc:service/vpn-svc:qos/vpn-svc:qos-classification-policy/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow/vpn-svc:match-flow" {
-      uses flow-definition;
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
+        + "/svc:site-network-access/vpn-svc:service/vpn-svc:qos"
+        + "/vpn-svc:qos-classification-policy/vpn-svc:rule"
+        + "/vpn-svc:match-type/vpn-svc:match-flow"
+        + "/vpn-svc:match-flow" {
+    uses flow-definition;
   }
 }

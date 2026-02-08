@@ -980,7 +980,8 @@ module ietf-vpn-svc {
       "Augmentation for site-level.";
   }
 
-  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses/svc:site-network-access" {
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
+        + "/svc:site-network-access" {
     container vpn-attachment {
       choice attachment-flavor {
         case vpn-id {
