@@ -190,103 +190,6 @@ module ietf-l3vpn-svc {
       "Base identity for site placement constraints.";
   }
 
-  identity customer-application {
-    description
-      "Base identity for customer application.";
-  }
-
-  identity web {
-    base customer-application;
-    description
-      "Identity for Web application (e.g., HTTP, HTTPS).";
-  }
-
-  identity mail {
-    base customer-application;
-    description
-      "Identity for mail application.";
-  }
-
-  identity file-transfer {
-    base customer-application;
-    description
-      "Identity for file transfer application (e.g., FTP, SFTP).";
-  }
-
-  identity database {
-    base customer-application;
-    description
-      "Identity for database application.";
-  }
-
-  identity social {
-    base customer-application;
-    description
-      "Identity for social-network application.";
-  }
-
-  identity games {
-    base customer-application;
-    description
-      "Identity for gaming application.";
-  }
-
-  identity p2p {
-    base customer-application;
-    description
-      "Identity for peer-to-peer application.";
-  }
-
-  identity network-management {
-    base customer-application;
-    description
-      "Identity for management application
-       (e.g., Telnet, syslog, SNMP).";
-  }
-
-  identity voice {
-    base customer-application;
-    description
-      "Identity for voice application.";
-  }
-
-  identity video {
-    base customer-application;
-    description
-      "Identity for video conference application.";
-  }
-
-  identity embb {
-    base customer-application;
-    description
-      "Identity for an enhanced Mobile Broadband (eMBB)
-       application.  Note that an eMBB application demands
-       network performance with a wide variety of
-       characteristics, such as data rate, latency,
-       loss rate, reliability, and many other parameters.";
-  }
-
-  identity urllc {
-    base customer-application;
-    description
-      "Identity for an Ultra-Reliable and Low Latency
-       Communications (URLLC) application.  Note that a
-       URLLC application demands network performance
-       with a wide variety of characteristics, such as latency,
-       reliability, and many other parameters.";
-  }
-
-  identity mmtc {
-    base customer-application;
-    description
-      "Identity for a massive Machine Type
-       Communications (mMTC) application.  Note that an
-       mMTC application demands network performance
-       with a wide variety of characteristics, such as data
-       rate, latency, loss rate, reliability, and many
-       other parameters.";
-  }
-
   identity site-vpn-flavor-sub {
     base vpn-svc:site-vpn-flavor;
     description
@@ -543,30 +446,6 @@ module ietf-l3vpn-svc {
       "Identity for IPv6 Prefix filter type.";
   }
 
-  identity qos-profile-direction {
-    description
-      "Base identity for QoS profile direction.";
-  }
-
-  identity site-to-wan {
-    base qos-profile-direction;
-    description
-      "Identity for Site-to-WAN direction.";
-  }
-
-  identity wan-to-site {
-    base qos-profile-direction;
-    description
-      "Identity for WAN-to-Site direction.";
-  }
-
-  identity both {
-    base qos-profile-direction;
-    description
-      "Identity for both WAN-to-Site direction
-       and Site-to-WAN direction.";
-  }
-
   grouping multicast-rp-group-cfg {
     choice group-format {
       mandatory true;
@@ -727,131 +606,109 @@ module ietf-l3vpn-svc {
   }
 
   grouping flow-definition {
-    container match-flow {
-      leaf dscp {
-        type inet:dscp;
+    leaf ipv4-src-prefix {
+      type inet:ipv4-prefix;
+      description
+        "Match on IPv4 src address.";
+    }
+    leaf ipv6-src-prefix {
+      type inet:ipv6-prefix;
+      description
+        "Match on IPv6 src address.";
+    }
+    leaf ipv4-dst-prefix {
+      type inet:ipv4-prefix;
+      description
+        "Match on IPv4 dst address.";
+    }
+    leaf ipv6-dst-prefix {
+      type inet:ipv6-prefix;
+      description
+        "Match on IPv6 dst address.";
+    }
+    leaf l4-src-port {
+      type inet:port-number;
+      must 'current() < ../l4-src-port-range/lower-port or '
+          + 'current() > ../l4-src-port-range/upper-port' {
         description
-          "DSCP value.";
-      }
-      leaf dot1p {
-        type uint8 {
-          range "0..7";
-        }
-        description
-          "802.1p matching.";
-      }
-      leaf ipv4-src-prefix {
-        type inet:ipv4-prefix;
-        description
-          "Match on IPv4 src address.";
-      }
-      leaf ipv6-src-prefix {
-        type inet:ipv6-prefix;
-        description
-          "Match on IPv6 src address.";
-      }
-      leaf ipv4-dst-prefix {
-        type inet:ipv4-prefix;
-        description
-          "Match on IPv4 dst address.";
-      }
-      leaf ipv6-dst-prefix {
-        type inet:ipv6-prefix;
-        description
-          "Match on IPv6 dst address.";
-      }
-      leaf l4-src-port {
-        type inet:port-number;
-        must 'current() < ../l4-src-port-range/lower-port or '
-           + 'current() > ../l4-src-port-range/upper-port' {
-          description
-            "If l4-src-port and l4-src-port-range/lower-port and
-             upper-port are set at the same time, l4-src-port
-             should not overlap with l4-src-port-range.";
-        }
-        description
-          "Match on Layer 4 src port.";
-      }
-      leaf-list target-sites {
-        if-feature "target-sites";
-        type svc-id;
-        description
-          "Identify a site as traffic destination.";
-      }
-      container l4-src-port-range {
-        leaf lower-port {
-          type inet:port-number;
-          description
-            "Lower boundary for port.";
-        }
-        leaf upper-port {
-          type inet:port-number;
-          must '. >= ../lower-port' {
-            description
-              "Upper boundary for port.  If it
-               exists, the upper boundary must be
-               higher than the lower boundary.";
-          }
-          description
-            "Upper boundary for port.";
-        }
-        description
-          "Match on Layer 4 src port range.  When
-           only the lower-port is present, it represents
-           a single port.  When both the lower-port and
-           upper-port are specified, it implies
-           a range inclusive of both values.";
-      }
-      leaf l4-dst-port {
-        type inet:port-number;
-        must 'current() < ../l4-dst-port-range/lower-port or '
-           + 'current() > ../l4-dst-port-range/upper-port' {
-          description
-            "If l4-dst-port and l4-dst-port-range/lower-port
-             and upper-port are set at the same time,
-             l4-dst-port should not overlap with
-             l4-src-port-range.";
-        }
-        description
-          "Match on Layer 4 dst port.";
-      }
-      container l4-dst-port-range {
-        leaf lower-port {
-          type inet:port-number;
-          description
-            "Lower boundary for port.";
-        }
-        leaf upper-port {
-          type inet:port-number;
-          must '. >= ../lower-port' {
-            description
-              "Upper boundary must be
-               higher than lower boundary.";
-          }
-          description
-            "Upper boundary for port.  If it exists,
-             upper boundary must be higher than lower
-             boundary.";
-        }
-        description
-          "Match on Layer 4 dst port range.  When only
-           lower-port is present, it represents a single
-           port.  When both lower-port and upper-port are
-           specified, it implies a range inclusive of both
-           values.";
-      }
-      leaf protocol-field {
-        type union {
-          type uint8;
-          type identityref {
-            base protocol-type;
-          }
-        }
-        description
-          "Match on IPv4 protocol or IPv6 Next Header field.";
+          "If l4-src-port and l4-src-port-range/lower-port and
+            upper-port are set at the same time, l4-src-port
+            should not overlap with l4-src-port-range.";
       }
       description
-        "Describes flow-matching criteria.";
+        "Match on Layer 4 src port.";
+    }
+    container l4-src-port-range {
+      leaf lower-port {
+        type inet:port-number;
+        description
+          "Lower boundary for port.";
+      }
+      leaf upper-port {
+        type inet:port-number;
+        must '. >= ../lower-port' {
+          description
+            "Upper boundary for port.  If it
+              exists, the upper boundary must be
+              higher than the lower boundary.";
+        }
+        description
+          "Upper boundary for port.";
+      }
+      description
+        "Match on Layer 4 src port range.  When
+          only the lower-port is present, it represents
+          a single port.  When both the lower-port and
+          upper-port are specified, it implies
+          a range inclusive of both values.";
+    }
+    leaf l4-dst-port {
+      type inet:port-number;
+      must 'current() < ../l4-dst-port-range/lower-port or '
+          + 'current() > ../l4-dst-port-range/upper-port' {
+        description
+          "If l4-dst-port and l4-dst-port-range/lower-port
+            and upper-port are set at the same time,
+            l4-dst-port should not overlap with
+            l4-src-port-range.";
+      }
+      description
+        "Match on Layer 4 dst port.";
+    }
+    container l4-dst-port-range {
+      leaf lower-port {
+        type inet:port-number;
+        description
+          "Lower boundary for port.";
+      }
+      leaf upper-port {
+        type inet:port-number;
+        must '. >= ../lower-port' {
+          description
+            "Upper boundary must be
+              higher than lower boundary.";
+        }
+        description
+          "Upper boundary for port.  If it exists,
+            upper boundary must be higher than lower
+            boundary.";
+      }
+      description
+        "Match on Layer 4 dst port range.  When only
+          lower-port is present, it represents a single
+          port.  When both lower-port and upper-port are
+          specified, it implies a range inclusive of both
+          values.";
+    }
+    leaf protocol-field {
+      type union {
+        type uint8;
+        type identityref {
+          base protocol-type;
+        }
+      }
+      description
+        "Match on IPv4 protocol or IPv6 Next Header field.";
     }
     description
       "Flow definition based on criteria.";
@@ -934,191 +791,6 @@ module ietf-l3vpn-svc {
     }
     description
       "Defines MPLS service parameters for a site.";
-  }
-
-  grouping site-service-qos-profile {
-    container qos {
-      if-feature "qos";
-      container qos-classification-policy {
-        list rule {
-          key "id";
-          ordered-by user;
-          leaf id {
-            type string;
-            description
-              "A description identifying the
-               qos-classification-policy rule.";
-          }
-          choice match-type {
-            default "match-flow";
-            case match-flow {
-              uses flow-definition;
-            }
-            case match-application {
-              leaf match-application {
-                type identityref {
-                  base customer-application;
-                }
-                description
-                  "Defines the application to match.";
-              }
-            }
-            description
-              "Choice for classification.";
-          }
-          leaf target-class-id {
-            type string;
-            description
-              "Identification of the class of service.
-               This identifier is internal to the administration.";
-          }
-          description
-            "List of marking rules.";
-        }
-        description
-          "Configuration of the traffic classification policy.";
-      }
-      container qos-profile {
-        choice qos-profile {
-          description
-            "Choice for QoS profile.
-             Can be standard profile or customized profile.";
-          case standard {
-            description
-              "Standard QoS profile.";
-            leaf profile {
-              type leafref {
-                path
-                  "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers"
-                + "/vpn-svc:qos-profile-identifier/vpn-svc:id";
-              }
-              description
-                "QoS profile to be used.";
-            }
-          }
-          case custom {
-            description
-              "Customized QoS profile.";
-            container classes {
-              if-feature "qos-custom";
-              list class {
-                key "class-id";
-                leaf class-id {
-                  type string;
-                  description
-                    "Identification of the class of service.
-                     This identifier is internal to the
-                     administration.";
-                }
-                leaf direction {
-                  type identityref {
-                    base qos-profile-direction;
-                  }
-                  default "both";
-                  description
-                    "The direction to which the QoS profile
-                     is applied.";
-                }
-                leaf rate-limit {
-                  type decimal64 {
-                    fraction-digits 5;
-                    range "0..100";
-                  }
-                  units "percent";
-                  description
-                    "To be used if the class must be rate-limited.
-                     Expressed as percentage of the service
-                     bandwidth.";
-                }
-                container latency {
-                  choice flavor {
-                    case lowest {
-                      leaf use-lowest-latency {
-                        type empty;
-                        description
-                          "The traffic class should use the path with the
-                           lowest latency.";
-                      }
-                    }
-                    case boundary {
-                      leaf latency-boundary {
-                        type uint16;
-                        units "msec";
-                        default "400";
-                        description
-                          "The traffic class should use a path with a
-                           defined maximum latency.";
-                      }
-                    }
-                    description
-                      "Latency constraint on the traffic class.";
-                  }
-                  description
-                    "Latency constraint on the traffic class.";
-                }
-                container jitter {
-                  choice flavor {
-                    case lowest {
-                      leaf use-lowest-jitter {
-                        type empty;
-                        description
-                          "The traffic class should use the path with the
-                           lowest jitter.";
-                      }
-                    }
-                    case boundary {
-                      leaf latency-boundary {
-                        type uint32;
-                        units "usec";
-                        default "40000";
-                        description
-                          "The traffic class should use a path with a
-                           defined maximum jitter.";
-                      }
-                    }
-                    description
-                      "Jitter constraint on the traffic class.";
-                  }
-                  description
-                    "Jitter constraint on the traffic class.";
-                }
-                container bandwidth {
-                  leaf guaranteed-bw-percent {
-                    type decimal64 {
-                      fraction-digits 5;
-                      range "0..100";
-                    }
-                    units "percent";
-                    mandatory true;
-                    description
-                      "To be used to define the guaranteed bandwidth
-                       as a percentage of the available service bandwidth.";
-                  }
-                  leaf end-to-end {
-                    type empty;
-                    description
-                      "Used if the bandwidth reservation
-                       must be done on the MPLS network too.";
-                  }
-                  description
-                    "Bandwidth constraint on the traffic class.";
-                }
-                description
-                  "List of classes of services.";
-              }
-              description
-                "Container for list of classes of services.";
-            }
-          }
-        }
-        description
-          "QoS profile configuration.";
-      }
-      description
-        "QoS configuration.";
-    }
-    description
-      "This grouping defines QoS parameters for a site.";
   }
 
   grouping site-security-authentication {
@@ -1936,7 +1608,6 @@ module ietf-l3vpn-svc {
 
   grouping site-service {
     container service {
-      uses site-service-qos-profile;
       uses site-service-mpls;
       uses site-service-multicast;
       description
@@ -1949,7 +1620,6 @@ module ietf-l3vpn-svc {
   grouping site-network-access-service {
     container service {
       uses site-service-basic;
-      uses site-service-qos-profile;
       uses site-service-mpls;
       uses site-service-multicast;
       description
@@ -2098,6 +1768,11 @@ module ietf-l3vpn-svc {
       "List of filters used on the site.  This list can
         be augmented.";
   }
+
+  // TODO: augment in where site-service-qos-profile is used
+  // augment "/svc:svc/svc:sites/svc:site/vpn-svc:vpn-policies/vpn-svc:vpn-policy/vpn-svc:entries/vpn-svc:filters/vpn-svc:filter" {
+  //   uses flow-definition;
+  // }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
         + "/svc:site-network-access" {
