@@ -1576,58 +1576,6 @@ module ietf-l3vpn-svc {
       "Grouping for security parameters.";
   }
 
-  grouping access-vpn-policy {
-    container vpn-attachment {
-      choice attachment-flavor {
-        case vpn-policy-id {
-          leaf vpn-policy-id {
-            type leafref {
-              path "../../../../"
-                 + "vpn-svc:vpn-policies/vpn-svc:vpn-policy/"
-                 + "vpn-svc:vpn-policy-id";
-            }
-            description
-              "Reference to a VPN policy.  When referencing VPN
-               policy for attachment, the vpn-policy-id must be
-               configured.";
-          }
-        }
-        case vpn-id {
-          leaf vpn-id {
-            type leafref {
-              path "/svc:svc/vpn-svc:vpn-services"
-                 + "/vpn-svc:vpn-service/vpn-svc:vpn-id";
-            }
-            description
-              "Reference to an IP VPN.  Referencing a vpn-id provides
-               an easy way to attach a particular logical access to
-               a VPN.  In this case, vpn-id must be configured.";
-          }
-          leaf site-role {
-            type identityref {
-              base vpn-svc:site-role;
-            }
-            default "vpn-svc:any-to-any-role";
-            description
-              "Role of the site in the IP VPN.  When referencing a vpn-id,
-               the site-role setting must be added to express the role of
-               the site in the target VPN service topology.";
-          }
-        }
-        mandatory true;
-        description
-          "Choice for VPN attachment flavor.  A choice is implemented
-           to allow the user to choose the flavor that provides the
-           best fit.";
-      }
-      description
-        "Defines VPN attachment of a site.";
-    }
-    description
-      "Defines the VPN attachment rules for
-       a site's logical access.";
-  }
-
   grouping site-top-level-cfg {
     uses site-maximum-routes;
     uses site-security;
@@ -1641,7 +1589,6 @@ module ietf-l3vpn-svc {
     uses site-attachment-ip-connection;
     uses site-security;
     uses site-routing;
-    uses access-vpn-policy;
     description
       "Grouping for site network access top-level configuration.";
   }

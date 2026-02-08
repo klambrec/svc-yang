@@ -1865,49 +1865,6 @@ module ietf-l2vpn-svc {
       description
         "Container of available optional configurations.";
     }
-    container vpn-attachment {
-      choice attachment-flavor {
-        case vpn-id {
-          leaf vpn-id {
-            type leafref {
-              path "/svc:svc/vpn-svc:vpn-services"
-                 + "/vpn-svc:vpn-service/vpn-svc:vpn-id";
-            }
-            description
-              "Reference to an L2VPN.  Referencing a vpn-id
-               provides an easy way to attach a particular
-               logical access to a VPN.  In this case,
-               the vpn-id must be configured.";
-          }
-          leaf site-role {
-            type identityref {
-              base vpn-svc:site-role;
-            }
-            default "vpn-svc:any-to-any-role";
-            description
-              "Role of the site in the L2VPN.  When referencing
-               a vpn-id, the site-role setting must be added to
-               express the role of the site in the target VPN
-               service topology.";
-          }
-        }
-        case vpn-policy-id {
-          leaf vpn-policy-id {
-            type leafref {
-              path "../../../../vpn-svc:vpn-policies/vpn-svc:vpn-policy/"
-                 + "vpn-svc:vpn-policy-id";
-            }
-            description
-              "Reference to a VPN policy.";
-          }
-        }
-        mandatory true;
-        description
-          "Choice for the VPN attachment flavor.";
-      }
-      description
-        "Defines the VPN attachment of a site.";
-    }
     uses site-bum;
     uses site-mac-loop-prevention;
     uses site-acl;
