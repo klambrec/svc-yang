@@ -146,11 +146,6 @@ module ietf-l2vpn-svc {
       "Enables the support of VXLANs.";
   }
 
-  feature lan-tag {
-    description
-      "Enables LAN tag support in a VPN.";
-  }
-
   feature target-sites {
     description
       "Enables the support of the 'target-sites'
@@ -884,17 +879,6 @@ module ietf-l2vpn-svc {
       "User MAC addresses are advertised through EVPN-BGP.";
   }
 
-  identity vpn-policy-filter-type {
-    description
-      "Base identity for the filter type.";
-  }
-
-  identity lan {
-    base vpn-policy-filter-type;
-    description
-      "Identity for a LAN tag filter type.";
-  }
-
   identity mac-action {
     description
       "Base identity for a MAC action.";
@@ -1547,89 +1531,6 @@ module ietf-l2vpn-svc {
   }
 
   augment "/svc:svc/svc:sites/svc:site" {
-
-    container vpn-policies {
-      list vpn-policy {
-        key "vpn-policy-id";
-        leaf vpn-policy-id {
-          type string;
-          description
-            "Unique identifier for the VPN policy.";
-        }
-        list entries {
-          key "id";
-          leaf id {
-            type string;
-            description
-              "Unique identifier for the policy entry.";
-          }
-          container filters {
-            list filter {
-              key "type";
-              ordered-by user;
-              leaf type {
-                type identityref {
-                  base vpn-policy-filter-type;
-                }
-                description
-                  "Type of VPN policy filter.";
-              }
-              leaf-list lan-tag {
-                when "derived-from-or-self(../type, "
-                   + "'l2vpn-svc:lan')" {
-                  description
-                    "Only applies when the VPN policy filter is a
-                      LAN tag filter.";
-                }
-                if-feature "lan-tag";
-                type uint32;
-                description
-                  "List of Ethernet LAN tags to be matched.  An
-                    Ethernet LAN tag identifies a particular
-                    broadcast domain in a VPN.";
-              }
-              description
-                "List of filters used on the site.  This list can
-                  be augmented.";
-            }
-            description
-              "If a more granular VPN attachment is necessary,
-                filtering can be used.  If used, it permits the
-                splitting of site LANs among multiple VPNs.  The
-                site LAN can be split based on either the LAN tag or
-                the LAN prefix.  If no filter is used, all the LANs
-                will be part of the same VPNs with the same role.";
-          }
-          list vpn {
-            key "vpn-id";
-            leaf vpn-id {
-              type leafref {
-                path "/svc:svc/vpn-svc:vpn-services"
-                   + "/vpn-svc:vpn-service/vpn-svc:vpn-id";
-              }
-              description
-                "Reference to an L2VPN.";
-            }
-            leaf site-role {
-              type identityref {
-                base vpn-svc:site-role;
-              }
-              default "vpn-svc:any-to-any-role";
-              description
-                "Role of the site in the L2VPN.";
-            }
-            description
-              "List of VPNs with which the LAN is associated.";
-          }
-          description
-            "List of entries for an export policy.";
-        }
-        description
-          "List of VPN policies.";
-      }
-      description
-        "VPN policy.";
-    }
     container service {
       uses site-service-qos-profile;
       uses site-service-mpls;
@@ -2465,8 +2366,8 @@ module ietf-l2vpn-svc {
         case vpn-policy-id {
           leaf vpn-policy-id {
             type leafref {
-              path "../../../../vpn-policies/vpn-policy/"
-                 + "vpn-policy-id";
+              path "../../../../vpn-svc:vpn-policies/vpn-svc:vpn-policy/"
+                 + "vpn-svc:vpn-policy-id";
             }
             description
               "Reference to a VPN policy.";

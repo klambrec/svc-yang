@@ -75,11 +75,6 @@ module ietf-l3vpn-svc {
       "Enables IPv6 support in a VPN.";
   }
 
-  feature lan-tag {
-    description
-      "Enables LAN Tag support in a VPN Policy filter.";
-  }
-
   feature carrierscarrier {
     description
       "Enables support of CsC.";
@@ -536,27 +531,16 @@ module ietf-l3vpn-svc {
       "AH header type.";
   }
 
-  identity vpn-policy-filter-type {
-    description
-      "Base identity for VPN Policy filter type.";
-  }
-
   identity ipv4 {
-    base vpn-policy-filter-type;
+    base vpn-svc:vpn-policy-filter-type;
     description
       "Identity for IPv4 Prefix filter type.";
   }
 
   identity ipv6 {
-    base vpn-policy-filter-type;
+    base vpn-svc:vpn-policy-filter-type;
     description
       "Identity for IPv6 Prefix filter type.";
-  }
-
-  identity lan {
-    base vpn-policy-filter-type;
-    description
-      "Identity for LAN Tag filter type.";
   }
 
   identity qos-profile-direction {
@@ -1914,114 +1898,6 @@ module ietf-l3vpn-svc {
       "Multicast parameters for the site.";
   }
 
-  grouping site-vpn-policy {
-    container vpn-policies {
-      list vpn-policy {
-        key "vpn-policy-id";
-        leaf vpn-policy-id {
-          type svc-id;
-          description
-            "Unique identifier for the VPN policy.";
-        }
-        list entries {
-          key "id";
-          leaf id {
-            type svc-id;
-            description
-              "Unique identifier for the policy entry.";
-          }
-          container filters {
-            list filter {
-              key "type";
-              ordered-by user;
-              leaf type {
-                type identityref {
-                  base vpn-policy-filter-type;
-                }
-                description
-                  "Type of VPN Policy filter.";
-              }
-              leaf-list lan-tag {
-                when
-                  "derived-from-or-self(../type, 'l3vpn-svc:lan')" {
-                  description
-                    "Only applies when the VPN Policy filter is a
-                     LAN Tag filter.";
-                }
-                if-feature "lan-tag";
-                type string;
-                description
-                  "List of 'lan-tag' items to be matched.  LAN Tag
-                   is an Internal tag to be used in VPN policies ";
-              }
-              leaf-list ipv4-lan-prefix {
-                when
-                  "derived-from-or-self(../type, 'l3vpn-svc:ipv4')" {
-                  description
-                    "Only applies when VPN Policy filter is IPv4 Prefix filter.";
-                }
-                if-feature "ipv4";
-                type inet:ipv4-prefix;
-                description
-                  "List of IPv4 prefixes as LAN Prefixes to be matched.";
-              }
-              leaf-list ipv6-lan-prefix {
-                when
-                  "derived-from-or-self(../type, 'l3vpn-svc:ipv6')" {
-                  description
-                    "Only applies when VPN Policy filter is IPv6 Prefix filter.";
-                }
-                if-feature "ipv6";
-                type inet:ipv6-prefix;
-                description
-                  "List of IPv6 prefixes as LAN prefixes to be matched.";
-              }
-              description
-                "List of filters used on the site.  This list can
-                 be augmented.";
-            }
-            description
-              "If a more-granular VPN attachment is necessary, filtering can
-               be used.  If used, it permits the splitting of site LANs among
-               multiple VPNs.  The Site LAN can be split based on either LAN
-               Tag or LAN prefix.  If no filter is used, all the LANs will be
-               part of the same VPNs with the same role.";
-          }
-          list vpn {
-            key "vpn-id";
-            leaf vpn-id {
-              type leafref {
-                path "/svc:svc/vpn-svc:vpn-services/"
-                   + "vpn-svc:vpn-service/vpn-svc:vpn-id";
-              }
-              mandatory true;
-              description
-                "Reference to an IP VPN.";
-            }
-            leaf site-role {
-              type identityref {
-                base vpn-svc:site-role;
-              }
-              default "vpn-svc:any-to-any-role";
-              description
-                "Role of the site in the IP VPN.";
-            }
-            description
-              "List of VPNs the LAN is associated with.";
-          }
-          description
-            "List of entries for export policy.";
-        }
-        description
-          "List of VPN policies.";
-      }
-      description
-        "VPN policy.";
-    }
-    description
-      "VPN policy parameters for the site.";
-  }
-
   grouping site-maximum-routes {
     container maximum-routes {
       list address-family {
@@ -2090,8 +1966,8 @@ module ietf-l3vpn-svc {
           leaf vpn-policy-id {
             type leafref {
               path "../../../../"
-                 + "vpn-policies/vpn-policy/"
-                 + "vpn-policy-id";
+                 + "vpn-svc:vpn-policies/vpn-svc:vpn-policy/"
+                 + "vpn-svc:vpn-policy-id";
             }
             description
               "Reference to a VPN policy.  When referencing VPN
@@ -2136,7 +2012,6 @@ module ietf-l3vpn-svc {
   }
 
   grouping site-top-level-cfg {
-    uses site-vpn-policy;
     uses site-maximum-routes;
     uses site-security;
     uses site-service;
@@ -2194,6 +2069,34 @@ module ietf-l3vpn-svc {
 
   augment "/svc:svc/svc:sites/svc:site" {
     uses site-top-level-cfg;
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/vpn-svc:vpn-policies/vpn-svc:vpn-policy/vpn-svc:entries/vpn-svc:filters/vpn-svc:filter" {
+    leaf-list ipv4-lan-prefix {
+      when
+        "derived-from-or-self(../vpn-svc:type, 'l3vpn-svc:ipv4')" {
+        description
+          "Only applies when VPN Policy filter is IPv4 Prefix filter.";
+      }
+      if-feature "ipv4";
+      type inet:ipv4-prefix;
+      description
+        "List of IPv4 prefixes as LAN Prefixes to be matched.";
+    }
+    leaf-list ipv6-lan-prefix {
+      when
+        "derived-from-or-self(../vpn-svc:type, 'l3vpn-svc:ipv6')" {
+        description
+          "Only applies when VPN Policy filter is IPv6 Prefix filter.";
+      }
+      if-feature "ipv6";
+      type inet:ipv6-prefix;
+      description
+        "List of IPv6 prefixes as LAN prefixes to be matched.";
+    }
+    description
+      "List of filters used on the site.  This list can
+        be augmented.";
   }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
