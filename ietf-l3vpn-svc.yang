@@ -659,8 +659,8 @@ module ietf-l3vpn-svc {
             leaf profile-name {
               type leafref {
                 path
-                  "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers"
-                + "/vpn-svc:encryption-profile-identifier/vpn-svc:id";
+                  "/svc:svc/svc:svc-profiles/svc:valid-provider-identifiers"
+                + "/encryption-profile-identifier/id";
               }
               description
                 "Name of the SP profile to be applied.";
@@ -1289,8 +1289,8 @@ module ietf-l3vpn-svc {
               leaf profile-name {
                 type leafref {
                   path
-                    "/svc:svc/vpn-svc:vpn-profiles/vpn-svc:valid-provider-identifiers/"
-                  + "vpn-svc:bfd-profile-identifier/vpn-svc:id";
+                    "/svc:svc/svc:svc-profiles/svc:valid-provider-identifiers/"
+                  + "svc:bfd-profile-identifier/svc:id";
                 }
                 description
                   "Well-known SP profile name.  The provider can propose
@@ -1445,6 +1445,21 @@ module ietf-l3vpn-svc {
       "Grouping for site network access top-level configuration.";
   }
 
+  augment "/svc:svc/svc:svc-profiles"
+        + "/svc:valid-provider-identifiers" {
+    list encryption-profile-identifier {
+      key "id";
+      leaf id {
+        type string;
+        description
+          "Identification of the SP encryption profile
+            to be used.  Local administration meaning.";
+      }
+      description
+        "List for encryption profile identifiers.";
+    }
+  }
+
   augment "/svc:svc/vpn-svc:vpn-services/vpn-svc:vpn-service" {
     uses vpn-service-multicast;
     description
@@ -1515,14 +1530,14 @@ module ietf-l3vpn-svc {
         be augmented.";
   }
 
-  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service" {
+  augment "/svc:svc/svc:sites/svc:site/svc:service" {
     uses site-service-multicast;
   }
 
-  augment "/svc:svc/svc:sites/svc:site/vpn-svc:service"
-        + "/vpn-svc:qos/vpn-svc:qos-classification-policy"
-        + "/vpn-svc:rule/vpn-svc:match-type/vpn-svc:match-flow"
-        + "/vpn-svc:match-flow" {
+  augment "/svc:svc/svc:sites/svc:site/svc:service"
+        + "/svc:qos/svc:qos-classification-policy"
+        + "/svc:rule/svc:match-type/svc:match-flow"
+        + "/svc:match-flow" {
     uses flow-definition;
   }
 
@@ -1532,15 +1547,15 @@ module ietf-l3vpn-svc {
   }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
-        + "/svc:site-network-access/vpn-svc:service" {
+        + "/svc:site-network-access/svc:service" {
     uses site-service-multicast;
   }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
-        + "/svc:site-network-access/vpn-svc:service/vpn-svc:qos"
-        + "/vpn-svc:qos-classification-policy/vpn-svc:rule"
-        + "/vpn-svc:match-type/vpn-svc:match-flow"
-        + "/vpn-svc:match-flow" {
+        + "/svc:site-network-access/svc:service/svc:qos"
+        + "/svc:qos-classification-policy/svc:rule"
+        + "/svc:match-type/svc:match-flow"
+        + "/svc:match-flow" {
     uses flow-definition;
   }
 }

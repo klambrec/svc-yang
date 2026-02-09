@@ -3,14 +3,8 @@ module ietf-vpn-svc {
   namespace "urn:ietf:params:xml:ns:yang:ietf-vpn-svc";
   prefix vpn-svc;
 
-  import ietf-inet-types {
-    prefix inet;
-  }
   import ietf-svc {
     prefix svc;
-  }
-  import ietf-netconf-acm {
-    prefix nacm;
   }
 
   organization
@@ -59,27 +53,6 @@ module ietf-vpn-svc {
   feature lan-tag {
     description
       "Enables LAN Tag support in a VPN Policy filter.";
-  }
-
-  feature qos {
-    description
-      "Enables support for QoS.";
-  }
-
-  feature qos-custom {
-    description
-      "Enables the support of a custom QoS profile.";
-  }
-
-  feature target-sites {
-    description
-      "Enables the support of the 'target-sites'
-       match-flow parameter.";
-  }
-
-  feature input-bw {
-    description
-      "Enables the support of input bandwidth in a VPN.";
   }
 
   identity service-type {
@@ -161,53 +134,6 @@ module ietf-vpn-svc {
        Used to describe an NNI option A connection.";
   }
 
-  identity bw-type {
-    description
-      "Identity of the bandwidth type.";
-  }
-
-  identity bw-per-cos {
-    base bw-type;
-    description
-      "Bandwidth is per CoS.";
-  }
-
-  identity bw-per-port {
-    base bw-type;
-    description
-      "Bandwidth is per site network access.";
-  }
-
-  identity bw-per-site {
-    base bw-type;
-    description
-      "Bandwidth is per site.  It is applicable to
-       all the site network accesses within the site.";
-  }
-
-  identity bw-per-svc {
-    base bw-type;
-    description
-      "Bandwidth is per VPN service.";
-  }
-
-  identity bw-direction {
-    description
-      "Identity for the bandwidth direction.";
-  }
-
-  identity input-bw {
-    base bw-direction;
-    description
-      "Identity for the input bandwidth.";
-  }
-
-  identity output-bw {
-    base bw-direction;
-    description
-      "Identity for the output bandwidth.";
-  }
-
   identity carrierscarrier-type {
     description
       "Identity of the CsC type.";
@@ -229,29 +155,6 @@ module ietf-vpn-svc {
        the routing protocol.";
   }
 
-  identity color-type {
-    description
-      "Identity of color types.";
-  }
-
-  identity green {
-    base color-type;
-    description
-      "Identity of the 'green' color type.";
-  }
-
-  identity yellow {
-    base color-type;
-    description
-      "Identity of the 'yellow' color type.";
-  }
-
-  identity red {
-    base color-type;
-    description
-      "Identity of the 'red' color type.";
-  }
-
   identity vpn-policy-filter-type {
     description
       "Base identity for the filter type.";
@@ -261,394 +164,6 @@ module ietf-vpn-svc {
     base vpn-policy-filter-type;
     description
       "Identity for a LAN tag filter type.";
-  }
-
-  identity policing {
-    description
-      "Identity of the type of policing applied.";
-  }
-
-  identity one-rate-two-color {
-    base policing;
-    description
-      "Identity of one-rate, two-color (1R2C).";
-  }
-
-  identity two-rate-three-color {
-    base policing;
-    description
-      "Identity of two-rate, three-color (2R3C).";
-  }
-
-  identity qos-profile-direction {
-    description
-      "Base identity for the QoS-profile direction.";
-  }
-
-  identity site-to-wan {
-    base qos-profile-direction;
-    description
-      "Identity for the site-to-WAN direction.";
-  }
-
-  identity wan-to-site {
-    base qos-profile-direction;
-    description
-      "Identity for the WAN-to-site direction.";
-  }
-
-  identity bidirectional {
-    base qos-profile-direction;
-    description
-      "Identity for both the WAN-to-site direction
-       and the site-to-WAN direction.";
-  }
-
-  identity customer-application {
-    description
-      "Base identity for a customer application.";
-  }
-
-  identity web {
-    base customer-application;
-    description
-      "Identity for a web application (e.g., HTTP, HTTPS).";
-  }
-
-  identity mail {
-    base customer-application;
-    description
-      "Identity for a mail application.";
-  }
-
-  identity file-transfer {
-    base customer-application;
-    description
-      "Identity for a file-transfer application
-       (e.g., FTP, SFTP).";
-  }
-
-  identity database {
-    base customer-application;
-    description
-      "Identity for a database application.";
-  }
-
-  identity social {
-    base customer-application;
-    description
-      "Identity for a social-network application.";
-  }
-
-  identity games {
-    base customer-application;
-    description
-      "Identity for a gaming application.";
-  }
-
-  identity p2p {
-    base customer-application;
-    description
-      "Identity for a peer-to-peer application.";
-  }
-
-  identity network-management {
-    base customer-application;
-    description
-      "Identity for a management application
-       (e.g., Telnet, syslog, SNMP).";
-  }
-
-  identity voice {
-    base customer-application;
-    description
-      "Identity for a voice application.";
-  }
-
-  identity video {
-    base customer-application;
-    description
-      "Identity for a videoconference application.";
-  }
-
-  identity embb {
-    base customer-application;
-    description
-      "Identity for the enhanced Mobile Broadband (eMBB)
-       application.  Note that the eMBB application
-       requires strict threshold values for a wide variety
-       of network performance parameters (e.g., data rate,
-       latency, loss rate, reliability).";
-  }
-
-  identity urllc {
-    base customer-application;
-    description
-      "Identity for the Ultra-Reliable and Low Latency
-       Communications (URLLC) application.  Note that the
-       URLLC application requires strict threshold values for
-       a wide variety of network performance parameters
-       (e.g., latency, reliability).";
-  }
-
-  identity mmtc {
-    base customer-application;
-    description
-      "Identity for the massive Machine Type
-       Communications (mMTC) application.  Note that the
-       mMTC application requires strict threshold values for
-       a wide variety of network performance parameters
-       (e.g., data rate, latency, loss rate, reliability).";
-  }
-
-  grouping site-service-qos-profile {
-    container qos {
-      if-feature "qos";
-      container qos-classification-policy {
-        list rule {
-          key "id";
-          ordered-by user;
-          leaf id {
-            type string;
-            description
-              "A description identifying the QoS classification
-               policy rule.";
-          }
-          choice match-type {
-            default "match-flow";
-            case match-flow {
-              container match-flow {
-                leaf dscp {
-                  type inet:dscp;
-                  description
-                    "DSCP value.";
-                }
-                leaf dot1q {
-                  type uint16;
-                  description
-                    "802.1Q matching.  It is a VLAN tag added into
-                     a frame.";
-                }
-                leaf pcp {
-                  type uint8 {
-                    range "0..7";
-                  }
-                  description
-                    "PCP value.";
-                }
-                leaf color-type {
-                  type identityref {
-                    base color-type;
-                  }
-                  description
-                    "Color types.";
-                }
-                leaf-list target-sites {
-                  if-feature "target-sites";
-                  type svc:svc-id;
-                  description
-                    "Identifies a site as a traffic destination.";
-                }
-                leaf any {
-                  type empty;
-                  description
-                    "Allow all.";
-                }
-                leaf vpn-id {
-                  type svc:svc-id;
-                  description
-                    "Reference to the target VPN.";
-                }
-                description
-                  "Describes flow-matching criteria.";
-              }
-            }
-            case match-application {
-              leaf match-application {
-                type identityref {
-                  base customer-application;
-                }
-                description
-                  "Defines the application to match.";
-              }
-            }
-            description
-              "Choice for classification.";
-          }
-          leaf target-class-id {
-            type string;
-            description
-              "Identification of the CoS.
-               This identifier is internal to the
-               administration.";
-          }
-          description
-            "List of marking rules.";
-        }
-        description
-          "Configuration of the traffic classification policy.";
-      }
-      container qos-profile {
-        choice qos-profile {
-          description
-            "Choice for the QoS profile.
-             Can be a standard profile or a customized profile.";
-          case standard {
-            description
-              "Standard QoS profile.";
-            leaf profile {
-              type leafref {
-                path "/svc:svc/vpn-svc:vpn-profiles/"
-                   + "vpn-svc:valid-provider-identifiers/"
-                   + "vpn-svc:qos-profile-identifier/vpn-svc:id";
-              }
-              description
-                "QoS profile to be used.";
-            }
-          }
-          case custom {
-            description
-              "Customized QoS profile.";
-            container classes {
-              if-feature "qos-custom";
-              list class {
-                key "class-id";
-                leaf class-id {
-                  type string;
-                  description
-                    "Identification of the CoS.  This identifier is
-                     internal to the administration.";
-                }
-                leaf direction {
-                  type identityref {
-                    base qos-profile-direction;
-                  }
-                  default "bidirectional";
-                  description
-                    "The direction in which the QoS profile is
-                     applied.  By default, the direction is
-                     bidirectional.";
-                }
-                leaf policing {
-                  type identityref {
-                    base policing;
-                  }
-                  default "one-rate-two-color";
-                  description
-                    "The policing type can be either one-rate,
-                     two-color (1R2C) or two-rate, three-color
-                     (2R3C).  By default, the policing type is
-                     'one-rate-two-color'.";
-                }
-                leaf byte-offset {
-                  type uint16;
-                  description
-                    "Number of bytes in the service frame header
-                     that are excluded from the QoS calculation
-                     (e.g., extra VLAN tags).";
-                }
-                container frame-delay {
-                  choice flavor {
-                    case lowest {
-                      leaf use-lowest-latency {
-                        type empty;
-                        description
-                          "The traffic class should use the path
-                           with the lowest delay.";
-                      }
-                    }
-                    case boundary {
-                      leaf delay-bound {
-                        type uint16;
-                        units "milliseconds";
-                        description
-                          "The traffic class should use a path
-                           with a defined maximum delay.";
-                      }
-                    }
-                    description
-                      "Delay constraint on the traffic class.";
-                  }
-                  description
-                    "Delay constraint on the traffic class.";
-                }
-                container frame-jitter {
-                  choice flavor {
-                    case lowest {
-                      leaf use-lowest-jitter {
-                        type empty;
-                        description
-                          "The traffic class should use the path
-                           with the lowest jitter.";
-                      }
-                    }
-                    case boundary {
-                      leaf delay-bound {
-                        type uint32;
-                        units "microseconds";
-                        description
-                          "The traffic class should use a path
-                           with a defined maximum jitter.";
-                      }
-                    }
-                    description
-                      "Jitter constraint on the traffic class.";
-                  }
-                  description
-                    "Jitter constraint on the traffic class.";
-                }
-                container frame-loss {
-                  leaf rate {
-                    type decimal64 {
-                      fraction-digits 2;
-                      range "0..100";
-                    }
-                    units "percent";
-                    description
-                      "Frame loss rate constraint on the traffic
-                       class.";
-                  }
-                  description
-                    "Container for frame loss rate.";
-                }
-                container bandwidth {
-                  leaf guaranteed-bw-percent {
-                    type decimal64 {
-                      fraction-digits 5;
-                      range "0..100";
-                    }
-                    units "percent";
-                    mandatory true;
-                    description
-                      "Used to define the guaranteed bandwidth
-                       as a percentage of the available service
-                       bandwidth.";
-                  }
-                  leaf end-to-end {
-                    type empty;
-                    description
-                      "Used if the bandwidth reservation
-                       must be done on the MPLS network too.";
-                  }
-                  description
-                    "Bandwidth constraint on the traffic class.";
-                }
-                description
-                  "List of CoS entries.";
-              }
-              description
-                "Container for list of CoS entries.";
-            }
-          }
-        }
-        description
-          "QoS profile configuration.";
-      }
-      description
-        "QoS configuration.";
-    }
-    description
-      "Grouping that defines QoS parameters for a site.";
   }
 
   grouping site-service-mpls {
@@ -705,8 +220,8 @@ module ietf-vpn-svc {
             key "cloud-identifier";
             leaf cloud-identifier {
               type leafref {
-                path "/svc:svc/vpn-profiles/"
-                   + "valid-provider-identifiers"
+                path "/svc:svc/svc:svc-profiles/"
+                   + "svc:valid-provider-identifiers"
                    + "/cloud-identifier/id";
               }
               description
@@ -815,60 +330,24 @@ module ietf-vpn-svc {
       description
         "Container for VPN services.";
     }
-    container vpn-profiles {
-      container valid-provider-identifiers {
-        list cloud-identifier {
-          if-feature "cloud-access";
-          key "id";
-          leaf id {
-            type string;
-            description
-              "Identification of cloud service.
-               Local administration meaning.";
-          }
-          description
-            "List for Cloud Identifiers.";
-        }
-        list encryption-profile-identifier {
-          key "id";
-          leaf id {
-            type string;
-            description
-              "Identification of the SP encryption profile
-               to be used.  Local administration meaning.";
-          }
-          description
-            "List for encryption profile identifiers.";
-        }
-        list qos-profile-identifier {
-          key "id";
-          leaf id {
-            type string;
-            description
-              "Identification of the QoS Profile to be used.
-               Local administration meaning.";
-          }
-          description
-            "List for QoS Profile Identifiers.";
-        }
-        list bfd-profile-identifier {
-          key "id";
-          leaf id {
-            type string;
-            description
-              "Identification of the SP BFD Profile to be used.
-               Local administration meaning.";
-          }
-          description
-            "List for BFD Profile identifiers.";
-        }
-        nacm:default-deny-write;
+  }
+
+  augment "/svc:svc/svc:svc-profiles"
+        + "/svc:valid-provider-identifiers" {
+    list cloud-identifier {
+      if-feature "cloud-access";
+      key "id";
+      leaf id {
+        type string;
         description
-          "Container for Valid Provider Identifies.";
+          "Identification of cloud service.
+            Local administration meaning.";
       }
       description
-        "Container for VPN Profiles.";
+        "List for Cloud Identifiers.";
     }
+    description
+      "Augmentation for valid provider identifiers.";
   }
 
   augment "/svc:svc/svc:sites/svc:site" {
@@ -964,14 +443,14 @@ module ietf-vpn-svc {
       description
         "VPN policy.";
     }
-    container service {
-      uses site-service-qos-profile;
-      uses site-service-mpls;
-      description
-        "Container for services.";
-    }
     description
       "Augmentation for site-level.";
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/svc:service" {
+    uses site-service-mpls;
+    description
+      "Augmentation for site service.";
   }
 
   augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
@@ -1019,138 +498,14 @@ module ietf-vpn-svc {
       description
         "Defines the VPN attachment of a site.";
     }
-    container service {
-      container svc-bandwidth {
-        if-feature "input-bw";
-        list bandwidth {
-          key "direction type";
-          leaf direction {
-            type identityref {
-              base bw-direction;
-            }
-            description
-              "Indicates the bandwidth direction.  It can be
-               the bandwidth download direction from the SP to
-               the site or the bandwidth upload direction from
-               the site to the SP.";
-          }
-          leaf type {
-            type identityref {
-              base bw-type;
-            }
-            description
-              "Bandwidth type.  By default, the bandwidth type
-               is set to 'bw-per-cos'.";
-          }
-          leaf cos-id {
-            when "derived-from-or-self(../type, "
-               + "'vpn-svc:bw-per-cos')" {
-              description
-                "Relevant when the bandwidth type is set to
-                 'bw-per-cos'.";
-            }
-            type uint8;
-            description
-              "Identifier of the CoS, indicated by DSCP or a
-               CE-VLAN CoS (802.1p) value in the service frame.
-               If the bandwidth type is set to 'bw-per-cos',
-               the CoS ID MUST also be specified.";
-          }
-          leaf vpn-id {
-            when "derived-from-or-self(../type, "
-               + "'vpn-svc:bw-per-svc')" {
-              description
-                "Relevant when the bandwidth type is
-                 set as bandwidth per VPN service.";
-            }
-            type svc:svc-id;
-            description
-              "Identifies the target VPN.  If the bandwidth
-               type is set as bandwidth per VPN service, the
-               vpn-id MUST be specified.";
-          }
-          leaf cir {
-            type uint64;
-            units "bps";
-            mandatory true;
-            description
-              "Committed Information Rate.  The maximum number
-               of bits that a port can receive or send over
-               an interface in one second.";
-          }
-          leaf cbs {
-            type uint64;
-            units "bps";
-            mandatory true;
-            description
-              "Committed Burst Size (CBS).  Controls the bursty
-               nature of the traffic.  Traffic that does not
-               use the configured Committed Information Rate
-               (CIR) accumulates credits until the credits
-               reach the configured CBS.";
-          }
-          leaf eir {
-            type uint64;
-            units "bps";
-            description
-              "Excess Information Rate (EIR), i.e., excess frame
-               delivery allowed that is not subject to an SLA.
-               The traffic rate can be limited by the EIR.";
-          }
-          leaf ebs {
-            type uint64;
-            units "bps";
-            description
-              "Excess Burst Size (EBS).  The bandwidth available
-               for burst traffic from the EBS is subject to the
-               amount of bandwidth that is accumulated during
-               periods when traffic allocated by the EIR
-               policy is not used.";
-          }
-          leaf pir {
-            type uint64;
-            units "bps";
-            description
-              "Peak Information Rate, i.e., maximum frame
-               delivery allowed.  It is equal to or less
-               than the sum of the CIR and the EIR.";
-          }
-          leaf pbs {
-            type uint64;
-            units "bps";
-            description
-              "Peak Burst Size.  It is measured in bytes per
-               second.";
-          }
-          description
-            "List of bandwidth values (e.g., per CoS,
-             per vpn-id).";
-        }
-        description
-          "From the customer site's perspective, the service
-           input/output bandwidth of the connection or
-           download/upload bandwidth from the SP/site
-           to the site/SP.";
-      }
-      leaf svc-mtu {
-        type uint16;
-        units "bytes";
-        description
-          "SVC MTU.  It is also known as the maximum
-           transmission unit or maximum frame size.  When
-           a frame is larger than the MTU, it is broken
-           down, or fragmented, into smaller pieces by
-           the network protocol to accommodate the MTU
-           of the network.  If CsC is enabled,
-           the requested svc-mtu leaf will refer to the
-           MPLS MTU and not to the link MTU.";
-      }
-      uses site-service-qos-profile;
-      uses site-service-mpls;
-      description
-        "Container for services.";
-    }
     description
       "Augmentation for site network access-level.";
+  }
+
+  augment "/svc:svc/svc:sites/svc:site/svc:site-network-accesses"
+        + "/svc:site-network-access/svc:service" {
+    uses site-service-mpls;
+    description
+      "Augmentation for site network access service.";
   }
 }
