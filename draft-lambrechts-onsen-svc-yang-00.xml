@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="rfc7991bis.rnc"?>
+
+<!DOCTYPE rfc [
+  <!ENTITY nbsp    "&#160;">
+  <!ENTITY zwsp   "&#8203;">
+  <!ENTITY nbhy   "&#8209;">
+  <!ENTITY wj     "&#8288;">
+]>
+
+<rfc
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  category="info"
+  docName="draft-lambrechts-onsen-svc-yang-00"
+  ipr="trust200902"
+  obsoletes=""
+  updates=""
+  submissionType="IETF"
+  xml:lang="en"
+  version="3">
+
+  <front>
+    <title>Base YANG Model for any Service</title>
+
+    <seriesInfo name="Internet-Draft" value="draft-lambrechts-onsen-svc-yang-00"/>
+   
+    <author fullname="Kris Lambrechts" initials="K." surname="Lambrechts">
+      <organization>NetEdge</organization>
+      <address>
+        <email>kris@netedge.plus</email>  
+        <uri>https://www.netedge.plus</uri>
+      </address>
+    </author>
+
+    <date year="2026"/>
+
+    <area>General</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+
+    <keyword>keyword</keyword>
+
+    <abstract>
+      <t>
+        The L2SM and L3SM YANG models provide a standardized approach to
+        modeling L2VPN and L3VPN services. However, these models do not interact
+        with each other, and they are not designed to be extended to model other
+        types of services. This document proposes a base YANG model for any
+        service, which can be used as a starting point for modeling specific
+        customer services.
+      </t>
+    </abstract>
+ 
+  </front>
+
+  <middle>
+    <section>
+      <name>Introduction</name>
+      <t>
+        This document defines a modular service modeling stack that extracts
+        technology-agnostic constructs into a base <tt>ietf-svc</tt> module,
+        separates Ethernet-specific treatment into <tt>ietf-eth-svc</tt>, and
+        layers VPN-oriented intent in <tt>ietf-vpn-svc</tt>, with bis versions of
+        L2VPN and L3VPN services augmenting the shared foundation.  The goals are
+        to reduce duplication between existing L2SM and L3SM work, enable new
+        service types to reuse common abstractions, and let operators expose a
+        consistent customer-facing interface while retaining flexibility for
+        technology-specific extensions.
+      </t>
+      
+      <section>
+        <name>Requirements Language</name>
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
+          "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
+          RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+          interpreted as described in BCP 14 <xref target="RFC2119"/>
+          <xref target="RFC8174"/> when, and only when, they appear in
+          all capitals, as shown here.</t>
+      </section>
+
+    </section>
+    <section>
+      <name>Limitations of the current Service Models</name>
+      <section>
+        <name>Limited Interoperability and Extensibility</name>
+        <t>
+          The YANG Service Models in <xref target="RFC8299"/> (L3SM) and
+          <xref target="RFC8466"/> (L2SM) capture Layer 3 and Layer 2 VPN
+          service intent at an abstraction level that is directly applicable
+          to the agreements between an operator and their customers.
+          
+          These models individually cover all the inputs to deliver either L2VPN
+          or L3VPN services. However, a provider who wants to offer both types
+          of services must manage two separate models and/or request their
+          customers to enter a lot of duplicate information. It is difficult to
+          express certain relationships between the L2VPN and L3VPN services
+          being ordered, such as diversity or bandwidth constraints.
+
+          More broadly, operators and their customers would benefit from a
+          common service modeling framework that can be reused across different
+          service types, and that can capture the relationships and constraints.
+
+          Examples services that could be modeled on top of the same base
+          include the already standardized L2VPN and L3VPN services, but also
+          non-VPN services such as (business) internet access, cloud
+          connectivity, or even optical wavelength services. 
+          The common service model would also allow operators to maintain a
+          consistent customer-facing interface across different service types,
+          and to more easily introduce new service types in the future.
+        </t>
+      </section>
+
+      <section>
+        <name>Missing support for network layering</name>
+        <t>
+          The current L2SM and L3SM models do not have a way to express the
+          relationships between different service layers. For example, an
+          operator may want to specify that an L3VPN service should be delivered
+          over a specific L2VPN service, or that an SD-WAN service should be
+          delivered over a specific internet access service or MPLS-based L3VPN.
+          This lack of support for network layering makes it difficult to model
+          and manage complex service offerings that involve multiple layers of
+          abstraction and different technologies.
+        </t>
+      </section>
+
+      <section>
+        <name>Over-abstraction hinders clear agreement</name>
+        <t>
+          The L3SM abstracts away from the underlying network technologies and
+          focuses on the service intent. While this is a strength in terms of
+          technology-agnostic modeling, it can also make it difficult to capture
+          certain service attributes that are relevant to the customer or to the
+          delivery of the service.
+        </t>
+        <t>
+          For example, the L3SM has no method of specifying a port and/or VLAN
+          on a Site Device on which a Site Network Access should be delivered. 
+          This can lead to ambiguity in the service specification, and it can
+          make it difficult for operators to ensure that the service is
+          delivered according to the customer's intent.
+        </t>
+        <t>
+          The constraints mechanism goes through great lengths to avoid
+          identifying the specific (number of) bearers that should be used to
+          deliver a service. The ordering process for many operators today is
+          much more explicit in naming the bearers, along with an explicit
+          mapping of each Site Network Access to those bearers. At least giving
+          the purchaser the option of providing their requirements in such an
+          explicit manner would guarantee that the operator can deliver a
+          service according to the customer's actual requirements.
+        </t>
+      </section>
+    </section>
+      
+    <section>
+      <name>Proposed solution</name>
+      <t>
+        This document revisits the L3SM and L2SM models and introduces a
+        family of YANG modules that factor out the common service concepts
+        into a shared base.  The new <tt>ietf-svc</tt> module provides a
+        technology-agnostic service skeleton covering sites, site-network-
+        accesses, diversity constraints, and bearer hints.  Ethernet-centric
+        constructs such as bandwidth profiles and QoS classification are
+        moved into a dedicated <tt>ietf-eth-svc</tt> module so that Ethernet-
+        based services can share the same treatment primitives without
+        cluttering the core service skeleton.
+      </t>
+      <t>        
+        The <tt>ietf-vpn-svc</tt>
+        module builds on that base to capture VPN-oriented attributes such as
+        service type, topology, cloud or extranet reachability, carriers'
+        carrier, and policy filters. Bis versions of <tt>ietf-l3vpn-svc</tt> and
+        <tt>ietf-l2vpn-svc</tt> then augment the shared service framework with
+        technology-specific parameters.  The L3VPN module retains the routing,
+        multicast, address-allocation, NAT, and BFD constructs from
+        <xref target="RFC8299"/>. The L2VPN module retains the Ethernet- and
+        OAM-specific behaviors from <xref target="RFC8466"/> (e.g., bundling,
+        CE-VLAN preservation, L2CP handling, CFM, and Y.1731) while leveraging
+        the shared service skeleton, the Ethernet treatment constructs in
+        <tt>ietf-eth-svc</tt>, and the VPN service identities from
+        <tt>ietf-vpn-svc</tt>.
+      </t>
+      <t>
+        The augment relationships across the modules are shown in
+        <xref target="fig-svc-augments"/>; the path is linear, with
+        <tt>ietf-svc</tt> at the root, <tt>ietf-eth-svc</tt> augmenting the
+        base skeleton, and <tt>ietf-vpn-svc</tt> augmenting both
+        <tt>ietf-eth-svc</tt> and <tt>ietf-svc</tt> before the VPN-specific
+        bis modules attach.
+      </t>
+      <figure anchor="fig-svc-augments">
+        <name>Service module augmentation relationships</name>
+        <artwork type="ascii-art">
+<![CDATA[
+module: ietf-svc                      (Base service skeleton)
+  +-- augment: ietf-eth-svc           (Ethernet attributes, e.g QoS)
+    +-- augment: ietf-vpn-svc         (VPN service common attributes)
+      +-- augment: ietf-l2vpn-svc     (L2VPN-specific attributes)
+      +-- augment: ietf-l3vpn-svc     (L3VPN-specific attributes)
+]]>
+        </artwork>
+      </figure>
+      <t>
+        By aligning the L2SM and L3SM models on a common foundation, this
+        work reduces duplication, improves consistency of service exposure
+        to customers and OSS/BSS systems, and simplifies the introduction of
+        future service types that can reuse the same base abstractions.
+      </t>
+    </section>
+
+    <section>
+      <name>Relationships to other work</name>
+      <t>
+        The network layer models, iet-l3vpn-ntw <xref target="RFC9182"/> and
+        iet-l2vpn-ntw <xref target="RFC9291"/> MAY benefit from a similar
+        modularization approach, but they are outside the scope of this
+        document.
+      </t>
+      <t>
+        Adoption of the common groupings defined in ietf-vpn-common
+        <xref target="RFC9181"/> at the service model level MAY be beneficial
+        and should be considered as part of this work.
+      </t>
+    </section>
+    
+    <section anchor="IANA">
+      <name>IANA Considerations</name>
+      <t>This memo includes no request to IANA.</t>
+    </section>
+    
+    <section anchor="Security">
+      <name>Security Considerations</name>
+      <t>
+        The security posture of this document follows the guidance in the L3SM
+        <xref target="RFC8299"/>. The NETCONF Access Control Model (NACM)
+        <xref target="RFC6536"/> SHOULD be used to restrict protocol operations
+        and data nodes to authorized principals.
+      </t>
+      <t>
+        New augments added to the base service skeleton MUST describe any
+        additional security-sensitive leaves and specify suitable NACM rules.
+        When encryption or authentication material is conveyed (e.g., keys
+        or credentials), operators MUST ensure secure transport and
+        operational processes (rotation, revocation, audit) consistent with
+        their policy.
+      </t>
+    </section>
+    
+  </middle>
+
+  <back>
+    <references>
+      <name>References</name>
+      <references>
+        <name>Normative References</name>
+        
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6536.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9181.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9182.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9291.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8299.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8466.xml"/>
+        
+      </references>
+    </references>
+ </back>
+</rfc>
