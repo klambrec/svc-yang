@@ -4,8 +4,8 @@
 
 Internet Engineering Task Force                            K. Lambrechts
 Internet-Draft                                                   NetEdge
-Intended status: Informational                          13 February 2026
-Expires: 17 August 2026
+Intended status: Informational                          20 February 2026
+Expires: 24 August 2026
 
 
                     Base YANG Model for any Service
@@ -13,12 +13,11 @@ Expires: 17 August 2026
 
 Abstract
 
-   The L2SM and L3SM YANG models provide a standardized approach to
-   modeling L2VPN and L3VPN services.  However, these models do not
-   interact with each other, and they are not designed to be extended to
-   model other types of services.  This document proposes a base YANG
-   model for any service, which can be used as a starting point for
-   modeling specific customer services.
+   This document defines a modular service modeling stack that extracts
+   technology-agnostic constructs into a base ietf-svc module, separates
+   Ethernet-specific treatment into ietf-eth-svc, and layers VPN-
+   oriented intent in ietf-vpn-svc, with bis versions of L2VPN and L3VPN
+   services augmenting the shared foundation.
 
 Status of This Memo
 
@@ -35,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 August 2026.
+   This Internet-Draft will expire on 24 August 2026.
 
 Copyright Notice
 
@@ -53,7 +52,8 @@ Copyright Notice
 
 
 
-Lambrechts               Expires 17 August 2026                 [Page 1]
+
+Lambrechts               Expires 24 August 2026                 [Page 1]
 
 Internet-Draft       Base YANG Model for any Service       February 2026
 
@@ -61,14 +61,13 @@ Internet-Draft       Base YANG Model for any Service       February 2026
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   2
    2.  Limitations of the current Service Models . . . . . . . . . .   2
      2.1.  Limited Interoperability and Extensibility  . . . . . . .   2
      2.2.  Missing support for network layering  . . . . . . . . . .   3
      2.3.  Over-abstraction hinders clear agreement  . . . . . . . .   3
-   3.  Proposed solution . . . . . . . . . . . . . . . . . . . . . .   4
+   3.  Proposed solution . . . . . . . . . . . . . . . . . . . . . .   3
    4.  Relationships to other work . . . . . . . . . . . . . . . . .   4
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
    7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
      7.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
@@ -76,23 +75,16 @@ Table of Contents
 
 1.  Introduction
 
-   This document defines a modular service modeling stack that extracts
-   technology-agnostic constructs into a base ietf-svc module, separates
-   Ethernet-specific treatment into ietf-eth-svc, and layers VPN-
-   oriented intent in ietf-vpn-svc, with bis versions of L2VPN and L3VPN
-   services augmenting the shared foundation.  The goals are to reduce
-   duplication between existing L2SM and L3SM work, enable new service
-   types to reuse common abstractions, and let operators expose a
-   consistent customer-facing interface while retaining flexibility for
-   technology-specific extensions.
-
-1.1.  Requirements Language
-
-   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-   "OPTIONAL" in this document are to be interpreted as described in BCP
-   14 [RFC2119] [RFC8174] when, and only when, they appear in all
-   capitals, as shown here.
+   The L2SM and L3SM YANG models provide a standardized approach to
+   modeling L2VPN and L3VPN services.  However, these models do not
+   interact with each other, and they are not designed to be extended to
+   model other types of services.  This document proposes a base YANG
+   model for any service, which can be used as a starting point for
+   modeling specific customer services.  The goals of this work are to
+   reduce duplication between existing L2SM and L3SM work, enable new
+   service types to reuse common abstractions, and let operators expose
+   a consistent customer-facing interface while retaining flexibility
+   for technology-specific extensions.
 
 2.  Limitations of the current Service Models
 
@@ -106,26 +98,26 @@ Table of Contents
    provider who wants to offer both types of services must manage two
    separate models and/or request their customers to enter a lot of
    duplicate information.  It is difficult to express certain
-
-
-
-Lambrechts               Expires 17 August 2026                 [Page 2]
-
-Internet-Draft       Base YANG Model for any Service       February 2026
-
-
    relationships between the L2VPN and L3VPN services being ordered,
    such as diversity or bandwidth constraints.  More broadly, operators
    and their customers would benefit from a common service modeling
    framework that can be reused across different service types, and that
-   can capture the relationships and constraints.  Examples services
+   can capture the relationships and constraints.  Examples of services
    that could be modeled on top of the same base include the already
    standardized L2VPN and L3VPN services, but also non-VPN services such
    as (business) internet access, cloud connectivity, or even optical
-   wavelength services.  The common service model would also allow
-   operators to maintain a consistent customer-facing interface across
-   different service types, and to more easily introduce new service
-   types in the future.
+
+
+
+Lambrechts               Expires 24 August 2026                 [Page 2]
+
+Internet-Draft       Base YANG Model for any Service       February 2026
+
+
+   wavelength services.  The common service model would allow operators
+   to maintain a consistent customer-facing interface across different
+   service types, and to more easily introduce new service types in the
+   future.
 
 2.2.  Missing support for network layering
 
@@ -161,15 +153,6 @@ Internet-Draft       Base YANG Model for any Service       February 2026
    such an explicit manner would guarantee that the operator can deliver
    a service according to the customer's actual requirements.
 
-
-
-
-
-Lambrechts               Expires 17 August 2026                 [Page 3]
-
-Internet-Draft       Base YANG Model for any Service       February 2026
-
-
 3.  Proposed solution
 
    This document revisits the L3SM and L2SM models and introduces a
@@ -179,6 +162,14 @@ Internet-Draft       Base YANG Model for any Service       February 2026
    diversity constraints, and bearer hints.  Ethernet-centric constructs
    such as bandwidth profiles and QoS classification are moved into a
    dedicated ietf-eth-svc module so that Ethernet- based services can
+
+
+
+Lambrechts               Expires 24 August 2026                 [Page 3]
+
+Internet-Draft       Base YANG Model for any Service       February 2026
+
+
    share the same treatment primitives without cluttering the core
    service skeleton.
 
@@ -215,50 +206,42 @@ Internet-Draft       Base YANG Model for any Service       February 2026
 4.  Relationships to other work
 
    The network layer models, iet-l3vpn-ntw [RFC9182] and iet-l2vpn-ntw
-   [RFC9291] MAY benefit from a similar modularization approach, but
+   [RFC9291] may benefit from a similar modularization approach, but
    they are outside the scope of this document.
 
-
-
-
-Lambrechts               Expires 17 August 2026                 [Page 4]
-
-Internet-Draft       Base YANG Model for any Service       February 2026
-
-
    Adoption of the common groupings defined in ietf-vpn-common [RFC9181]
-   at the service model level MAY be beneficial and should be considered
+   at the service model level may be beneficial and should be considered
    as part of this work.
 
 5.  IANA Considerations
 
    This memo includes no request to IANA.
 
+
+
+
+
+Lambrechts               Expires 24 August 2026                 [Page 4]
+
+Internet-Draft       Base YANG Model for any Service       February 2026
+
+
 6.  Security Considerations
 
    The security posture of this document follows the guidance in the
    L3SM [RFC8299].  The NETCONF Access Control Model (NACM) [RFC6536]
-   SHOULD be used to restrict protocol operations and data nodes to
+   should be used to restrict protocol operations and data nodes to
    authorized principals.
 
-   New augments added to the base service skeleton MUST describe any
+   New augments added to the base service skeleton must describe any
    additional security-sensitive leaves and specify suitable NACM rules.
    When encryption or authentication material is conveyed (e.g., keys or
-   credentials), operators MUST ensure secure transport and operational
+   credentials), operators must ensure secure transport and operational
    processes (rotation, revocation, audit) consistent with their policy.
 
 7.  References
 
 7.1.  Normative References
-
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <https://www.rfc-editor.org/info/rfc2119>.
-
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
    [RFC6536]  Bierman, A. and M. Bjorklund, "Network Configuration
               Protocol (NETCONF) Access Control Model", RFC 6536,
@@ -275,13 +258,6 @@ Internet-Draft       Base YANG Model for any Service       February 2026
               for Layer 3 VPNs", RFC 9182, DOI 10.17487/RFC9182,
               February 2022, <https://www.rfc-editor.org/info/rfc9182>.
 
-
-
-Lambrechts               Expires 17 August 2026                 [Page 5]
-
-Internet-Draft       Base YANG Model for any Service       February 2026
-
-
    [RFC9291]  Boucadair, M., Ed., Gonzalez de Dios, O., Ed., Barguil,
               S., and L. Munoz, "A YANG Network Data Model for Layer 2
               VPNs", RFC 9291, DOI 10.17487/RFC9291, September 2022,
@@ -296,6 +272,15 @@ Internet-Draft       Base YANG Model for any Service       February 2026
               Data Model for Layer 2 Virtual Private Network (L2VPN)
               Service Delivery", RFC 8466, DOI 10.17487/RFC8466, October
               2018, <https://www.rfc-editor.org/info/rfc8466>.
+
+
+
+
+
+Lambrechts               Expires 24 August 2026                 [Page 5]
+
+Internet-Draft       Base YANG Model for any Service       February 2026
+
 
 Author's Address
 
@@ -333,4 +318,19 @@ Author's Address
 
 
 
-Lambrechts               Expires 17 August 2026                 [Page 6]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lambrechts               Expires 24 August 2026                 [Page 6]

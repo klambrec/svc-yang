@@ -41,12 +41,11 @@
 
     <abstract>
       <t>
-        The L2SM and L3SM YANG models provide a standardized approach to
-        modeling L2VPN and L3VPN services. However, these models do not interact
-        with each other, and they are not designed to be extended to model other
-        types of services. This document proposes a base YANG model for any
-        service, which can be used as a starting point for modeling specific
-        customer services.
+        This document defines a modular service modeling stack that extracts
+        technology-agnostic constructs into a base <tt>ietf-svc</tt> module,
+        separates Ethernet-specific treatment into <tt>ietf-eth-svc</tt>, and
+        layers VPN-oriented intent in <tt>ietf-vpn-svc</tt>, with bis versions of
+        L2VPN and L3VPN services augmenting the shared foundation.
       </t>
     </abstract>
  
@@ -56,26 +55,17 @@
     <section>
       <name>Introduction</name>
       <t>
-        This document defines a modular service modeling stack that extracts
-        technology-agnostic constructs into a base <tt>ietf-svc</tt> module,
-        separates Ethernet-specific treatment into <tt>ietf-eth-svc</tt>, and
-        layers VPN-oriented intent in <tt>ietf-vpn-svc</tt>, with bis versions of
-        L2VPN and L3VPN services augmenting the shared foundation.  The goals are
-        to reduce duplication between existing L2SM and L3SM work, enable new
-        service types to reuse common abstractions, and let operators expose a
-        consistent customer-facing interface while retaining flexibility for
+        The L2SM and L3SM YANG models provide a standardized approach to
+        modeling L2VPN and L3VPN services. However, these models do not interact
+        with each other, and they are not designed to be extended to model other
+        types of services. This document proposes a base YANG model for any
+        service, which can be used as a starting point for modeling specific
+        customer services. The goals of this work are to reduce duplication
+        between existing L2SM and L3SM work, enable new service types to reuse
+        common abstractions, and let operators expose a consistent
+        customer-facing interface while retaining flexibility for
         technology-specific extensions.
       </t>
-      
-      <section>
-        <name>Requirements Language</name>
-        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
-          "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT
-          RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
-          interpreted as described in BCP 14 <xref target="RFC2119"/>
-          <xref target="RFC8174"/> when, and only when, they appear in
-          all capitals, as shown here.</t>
-      </section>
 
     </section>
     <section>
@@ -99,11 +89,11 @@
           common service modeling framework that can be reused across different
           service types, and that can capture the relationships and constraints.
 
-          Examples services that could be modeled on top of the same base
+          Examples of services that could be modeled on top of the same base
           include the already standardized L2VPN and L3VPN services, but also
           non-VPN services such as (business) internet access, cloud
           connectivity, or even optical wavelength services. 
-          The common service model would also allow operators to maintain a
+          The common service model would allow operators to maintain a
           consistent customer-facing interface across different service types,
           and to more easily introduce new service types in the future.
         </t>
@@ -212,13 +202,13 @@ module: ietf-svc                      (Base service skeleton)
       <name>Relationships to other work</name>
       <t>
         The network layer models, iet-l3vpn-ntw <xref target="RFC9182"/> and
-        iet-l2vpn-ntw <xref target="RFC9291"/> MAY benefit from a similar
+        iet-l2vpn-ntw <xref target="RFC9291"/> may benefit from a similar
         modularization approach, but they are outside the scope of this
         document.
       </t>
       <t>
         Adoption of the common groupings defined in ietf-vpn-common
-        <xref target="RFC9181"/> at the service model level MAY be beneficial
+        <xref target="RFC9181"/> at the service model level may be beneficial
         and should be considered as part of this work.
       </t>
     </section>
@@ -233,14 +223,14 @@ module: ietf-svc                      (Base service skeleton)
       <t>
         The security posture of this document follows the guidance in the L3SM
         <xref target="RFC8299"/>. The NETCONF Access Control Model (NACM)
-        <xref target="RFC6536"/> SHOULD be used to restrict protocol operations
+        <xref target="RFC6536"/> should be used to restrict protocol operations
         and data nodes to authorized principals.
       </t>
       <t>
-        New augments added to the base service skeleton MUST describe any
+        New augments added to the base service skeleton must describe any
         additional security-sensitive leaves and specify suitable NACM rules.
         When encryption or authentication material is conveyed (e.g., keys
-        or credentials), operators MUST ensure secure transport and
+        or credentials), operators must ensure secure transport and
         operational processes (rotation, revocation, audit) consistent with
         their policy.
       </t>
@@ -254,8 +244,6 @@ module: ietf-svc                      (Base service skeleton)
       <references>
         <name>Normative References</name>
         
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6536.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9181.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9182.xml"/>
