@@ -20,7 +20,7 @@
   version="3">
 
   <front>
-    <title>Base YANG Model for any Service</title>
+    <title abbrev="Extensible Service Model">An Extensible Architecture for Service Modeling</title>
 
     <seriesInfo name="Internet-Draft" value="draft-lambrechts-onsen-svc-yang-00"/>
    
@@ -37,7 +37,10 @@
     <area>General</area>
     <workgroup>Internet Engineering Task Force</workgroup>
 
-    <keyword>keyword</keyword>
+    <keyword>service model</keyword>
+    <keyword>YANG</keyword>
+    <keyword>extensible</keyword>
+    <keyword>modular</keyword>
 
     <abstract>
       <t>
@@ -46,7 +49,7 @@
         technology-agnostic constructs into a base <tt>ietf-svc</tt> module,
         separates Ethernet-specific treatment into <tt>ietf-eth-svc</tt>, and
         layers VPN-oriented intent in <tt>ietf-vpn-svc</tt>, with bis versions of
-        L2VPN and L3VPN services augmenting the shared foundation.
+        the L2SM and L3SM augmenting the shared foundation.
       </t>
     </abstract>
  
@@ -56,7 +59,7 @@
     <section>
       <name>Introduction</name>
       <t>
-        The Layer 2 Service Model (L2SM) <xref target="RFC8466"/> and Layer 3 
+        The Layer 2 VPN Service Model (L2SM) <xref target="RFC8466"/> and Layer 3 VPN
         Service Model (L3SM) <xref target="RFC8299"/> YANG 
         models provide a standardized approach to modeling L2VPN and L3VPN
         services. However, these models do not interact
@@ -65,8 +68,8 @@
       </t>
 
       <t>
-        This document describes and new, extensible archicture for services modules
-        and defines a YANG module for that can be used as the base for any
+        This document describes a new, extensible architecture for services modules
+        and defines a YANG module that can be used as the base for any
         customer service. The goals of this work are to reduce duplication
         between existing L2SM and L3SM work, enable new service types to reuse
         common abstractions, and let operators expose a consistent
@@ -76,7 +79,7 @@
 
     </section>
     <section>
-      <name>Limitations of the current Service Models</name>
+      <name>Limitations of the Current Service Models</name>
 
         <t>
           The following sections describe problems with the approach taken
@@ -87,44 +90,26 @@
         <name>High Levels of Duplication between the Service Models</name>
         <t>
           The L2SM and L3SM individually cover all the inputs to deliver either L2VPN
-          or L3VPN services, including an abstracted view of the operator's
+          or L3VPN services, including an abstracted view of the customer's
           site locations. This means that an operator that offers both types
           of services must manage two separate models with a large amount of 
           duplicated information.
         </t>
         
         <t>
-          When additional service models are defined for new service models,
-          the currently approach requires further duplication, making the 
+          When additional service models are defined for new service types,
+          the current approach requires further duplication, making the 
           problem worse.
         </t>
- 
-        <name>Limited Interoperability and Extensibility</name>
+      </section>
+      <section>
+        <name>Limited Interoperability between Service Models</name>
         <t>
-          The L2SM and L3SM capture Layer 2 and Layer 3 VPN
-          service intent at an abstraction level that is applicable
-          to the agreements between an operator and their customers. This means
-          it is difficult to express certain relationships between the 
+          It is impossible to express certain relationships between the 
           L2VPN and L3VPN services being ordered, such as diversity or 
           bandwidth constraints. This is especially important in deployment
           scenarios where common infrastructure hardware is used for 
           providing both L2VPN and L3VPN services. 
-        </t> 
-
-        <t>
-          **The next part is describing a solution and would probably be better
-          later on**
-          More broadly, operators and their customers would benefit from a
-          common service modeling framework that can be reused across different
-          service types, and that can capture the relationships and constraints.
-
-          Examples of services that could be modeled on top of the same base
-          include the already standardized L2VPN and L3VPN services, but also
-          non-VPN services such as (business) internet access, cloud
-          connectivity, or even optical wavelength services. 
-          The common service model would allow operators to maintain a
-          consistent customer-facing interface across different service types,
-          and to more easily introduce new service types in the future.
         </t>
       </section>
 
@@ -133,7 +118,7 @@
         <t>
           The current L2SM and L3SM models do not have a way to express the
           relationships between the different technology layers that are
-          used to provision the final service. For example, an
+          used to provision the overall service. For example, an
           operator may want to specify that an L3VPN service should be delivered
           over a specific underlying L2VPN service, or that an SD-WAN service should be
           delivered over a specific Internet access service.  The lack of 
@@ -148,41 +133,10 @@
         <t>
           Currently, the L2SM and L3SM do not contain operational state. If these
           modules are extended with state nodes, e.g., so it is possible to retrieve
-          information about the current health of customer's services, the 
+          information about the current health of a customer's services, the 
           separation of L2SM, L3SM, and other service models makes correlating 
           the service impact of underlying failures affecting more than one service
           type more difficult.
-        </t>
-      </section>
-
-      <section>
-        <name>Over-abstraction Hinders Clear Agreements</name>
-        <t>
-          **Is this a problem with the current model architecture or a shortcoming
-          in the L3SM specifics?**
-        <t>
-          The L3SM abstracts away from the underlying network technologies and
-          focuses on the service intent. While this is a strength in terms of
-          technology-agnostic modeling, it can also make it difficult to capture
-          certain service attributes that are relevant to the customer or to the
-          delivery of the service.
-        </t>
-        <t>
-          For example, the L3SM has no method of specifying a port and/or VLAN
-          on a Site Device on which a Site Network Access should be delivered. 
-          This can lead to ambiguity in the service specification, and it can
-          make it difficult for operators to ensure that the service is
-          delivered according to the customer's intent.
-        </t>
-        <t>
-          The constraints mechanism goes through great lengths to avoid
-          identifying the specific (number of) bearers that should be used to
-          deliver a service. The ordering process for many operators today is
-          much more explicit in naming the bearers, along with an explicit
-          mapping of each Site Network Access to those bearers. At least giving
-          the purchaser the option of providing their requirements in such an
-          explicit manner would guarantee that the operator can deliver a
-          service according to the customer's actual requirements.
         </t>
       </section>
     </section>
@@ -190,31 +144,31 @@
     <section>
       <name>Proposed Solution</name>
       <t>
-        This document revisits the existing L2SM and L2SM models, introducing a
+        This document revisits the existing L2SM and L3SM models, introducing a
         new structure with a common base model. This removes the duplication
         between service models, and enables much simpler interworking between
-        different service types. It also forms an extensbile basis for the
+        different service types. It also forms an extensible basis for the
         definition of new service models in the future.
       </t>
 
       <t>
         The core of the module structure is defined in <tt>ietf-svc</tt>. This
         provides a technology-agnostic service skeleton covering sites, 
-        site-network-accesses, diversity constraints, and bearer hints. 
+        site-network-accesses, diversity constraints, and bearer references. 
         Additionally,  Ethernet-centric constructs such as bandwidth profiles 
         and QoS classification are moved into a dedicated <tt>ietf-eth-svc</tt> 
         module so that Ethernet-based services can share the same primitives without
         cluttering the core service skeleton.
       </t>
       <t>        
-        The <tt>ietf-vpn-svc</tt> module builds on this define VPN-oriented 
+        The <tt>ietf-vpn-svc</tt> module builds on this core and defines VPN-oriented 
         attributes such as service type, topology, cloud, and extranet 
         reachability, carriers' carrier, and policy filters. 
       </t>
 
       <t>
-        Finally, the technology specific paramters for for L2VPN and L3VPN services 
-        are augmented into the shared service framework.The L3VPN module retains the routing,
+        Finally, the technology specific parameters for L2VPN and L3VPN services 
+        are augmented into the shared service framework. The L3VPN module retains the routing,
         multicast, address-allocation, NAT, and BFD constructs from
         <xref target="RFC8299"/>. The L2VPN module retains the Ethernet- and
         OAM-specific behaviors from <xref target="RFC8466"/> (e.g., bundling,
@@ -225,11 +179,7 @@
       </t>
       <t>
         The augment relationships across the modules are shown in
-        <xref target="fig-svc-augments"/>; the path is linear, with
-        <tt>ietf-svc</tt> at the root, <tt>ietf-eth-svc</tt> augmenting the
-        base skeleton, and <tt>ietf-vpn-svc</tt> augmenting both
-        <tt>ietf-eth-svc</tt> and <tt>ietf-svc</tt> before the VPN-specific
-        bis modules attach.
+        <xref target="fig-svc-augments"/>.
       </t>
       <figure anchor="fig-svc-augments">
         <name>Service module augmentation relationships</name>
@@ -248,19 +198,22 @@ module: ietf-svc                      (Base service skeleton)
         work reduces duplication, improves consistency of service exposure
         to customers and OSS/BSS systems, and simplifies the introduction of
         future service types that can reuse the same base abstractions.
+        Examples of new services that could be modeled on top of the same base
+        include (business) internet access, cloud interconnect, or even optical
+        wavelength services.
       </t>
     </section>
 
     <section>
-      <name>Relationships to other work</name>
+      <name>Relationships to Other Work</name>
       <t>
-        The network layer models, iet-l3vpn-ntw <xref target="RFC9182"/> and
-        iet-l2vpn-ntw <xref target="RFC9291"/> may benefit from a similar
-        modularization approach, but they are outside the scope of this
-        document.
+        The Layer 2 VPN Network Model (L2NM) <xref target="RFC9291"/> and
+        Layer 3 VPN Network Model (L3NM) <xref target="RFC9182"/>  may benefit
+        from being re-built on top of a similarly abstracted foundation,
+        but they are outside the scope of this document.
       </t>
       <t>
-        Adoption of the common groupings defined in ietf-vpn-common
+        Adoption of the Common YANG Data Model for Layer 2 and Layer 3 VPNs
         <xref target="RFC9181"/> at the service model level may be beneficial
         and should be considered as part of this work.
       </t>
