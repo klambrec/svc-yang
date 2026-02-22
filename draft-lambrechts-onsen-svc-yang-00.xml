@@ -229,7 +229,7 @@ module: ietf-svc                      (Base service skeleton)
       <t>
         The security posture of this document follows the guidance in the L3SM
         <xref target="RFC8299"/>. The NETCONF Access Control Model (NACM)
-        <xref target="RFC6536"/> should be used to restrict protocol operations
+        <xref target="RFC8341"/> should be used to restrict protocol operations
         and data nodes to authorized principals.
       </t>
       <t>
@@ -250,7 +250,7 @@ module: ietf-svc                      (Base service skeleton)
       <references>
         <name>Normative References</name>
         
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6536.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8341.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9181.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9182.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.9291.xml"/>

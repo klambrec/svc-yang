@@ -229,7 +229,7 @@ Internet-Draft          Extensible Service Model           February 2026
 6.  Security Considerations
 
    The security posture of this document follows the guidance in the
-   L3SM [RFC8299].  The NETCONF Access Control Model (NACM) [RFC6536]
+   L3SM [RFC8299].  The NETCONF Access Control Model (NACM) [RFC8341]
    should be used to restrict protocol operations and data nodes to
    authorized principals.
 
@@ -243,10 +243,10 @@ Internet-Draft          Extensible Service Model           February 2026
 
 7.1.  Normative References
 
-   [RFC6536]  Bierman, A. and M. Bjorklund, "Network Configuration
-              Protocol (NETCONF) Access Control Model", RFC 6536,
-              DOI 10.17487/RFC6536, March 2012,
-              <https://www.rfc-editor.org/info/rfc6536>.
+   [RFC8341]  Bierman, A. and M. Bjorklund, "Network Configuration
+              Access Control Model", STD 91, RFC 8341,
+              DOI 10.17487/RFC8341, March 2018,
+              <https://www.rfc-editor.org/info/rfc8341>.
 
    [RFC9181]  Barguil, S., Gonzalez de Dios, O., Ed., Boucadair, M.,
               Ed., and Q. Wu, "A Common YANG Data Model for Layer 2 and
